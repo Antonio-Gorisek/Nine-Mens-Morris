@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Class for adjusting the camera to fit the board.
-/// </summary>
 public static class CameraController
 {
     /// <summary>

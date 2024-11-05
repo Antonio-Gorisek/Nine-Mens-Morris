@@ -1,15 +1,20 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class BoardSpotPlacer
 {
     private readonly GameObject circleSpot;
     private readonly Transform parent;
     private readonly int numberOfRings;
+    private readonly float spacing;
 
-    public BoardSpotPlacer(GameObject circleSpot, Transform parent, int numberOfRings)
+    public List<Vector3> ListOfSpots = new List<Vector3>();
+
+    public BoardSpotPlacer(GameObject circleSpot, Transform parent, int numberOfRings, float spacing)
     {
         this.numberOfRings = numberOfRings;
         this.circleSpot = circleSpot;
+        this.spacing = spacing;
         this.parent = parent;
     }
 
@@ -18,7 +23,7 @@ public class BoardSpotPlacer
     /// </summary>
     public void PlaceCircleButtons()
     {
-        for (int size = 0; size <= numberOfRings; size++)
+        for (int size = 1; size <= numberOfRings; size++)
         {
             // Place buttons at the corners of the current ring
             PlaceButtons(new Vector3[]
@@ -56,6 +61,7 @@ public class BoardSpotPlacer
         {
             GameObject circleButton = Object.Instantiate(circleSpot, position, Quaternion.identity);
             circleButton.transform.SetParent(parent);
+            ListOfSpots.Add(circleButton.transform.position);
         }
     }
 }

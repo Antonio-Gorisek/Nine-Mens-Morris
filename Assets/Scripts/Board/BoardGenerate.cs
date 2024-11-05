@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardGenerate
@@ -10,10 +11,8 @@ public class BoardGenerate
     private readonly float _ringsSpacing;
     private readonly int _numberOfRings;
 
-    /// <summary>
-    /// Constructor for the BoardGenerate class.
-    /// Initializes the board with a specified rings and spacing size.
-    /// </summary>
+    public List<Vector3> ListOfSpots = new List<Vector3>();
+
     public BoardGenerate(int rings = 3, float spacing = 1)
     {
         // if numberOfRings is below 1, sets it to 3 (default).
@@ -50,9 +49,11 @@ public class BoardGenerate
         CameraController.AdjustCamera(_mainCamera, _numberOfRings, _ringsSpacing);
 
         BoardDrawer boardDrawer = new BoardDrawer(_lineRendererPrefab, _boardParentObj.transform, _ringsSpacing, _numberOfRings);
-        BoardSpotPlacer buttonPlacer = new BoardSpotPlacer(_circleSpot, _boardParentObj.transform, _numberOfRings);
+        BoardSpotPlacer buttonPlacer = new BoardSpotPlacer(_circleSpot, _boardParentObj.transform, _numberOfRings, _ringsSpacing);
 
         boardDrawer.DrawBoard();
         buttonPlacer.PlaceCircleButtons();
+
+        ListOfSpots = buttonPlacer.ListOfSpots;
     }
 }
