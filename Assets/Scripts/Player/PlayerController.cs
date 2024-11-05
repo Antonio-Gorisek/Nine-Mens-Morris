@@ -4,17 +4,14 @@ public class PlayerController : Singleton<PlayerController>
 {
     private Camera _camera;
 
-    private void Awake()
-    {
-        _camera = Camera.main;
-    }
+    private void Awake() => _camera = Camera.main;
 
     public void HandleInput(PieceController piece)
     {
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 worldPosition = GetMouseWorldPosition();
-            piece.TryToPlacePiece(worldPosition);
+            piece.SelectOrPlacePiece(worldPosition);
         }
     }
 
