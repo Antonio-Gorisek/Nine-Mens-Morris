@@ -4,10 +4,11 @@ using System.Collections.Generic;
 public class PieceController
 {
     private readonly Player[] _players;
-    private readonly Camera _mainCamera;
     private readonly HashSet<Vector3> _occupiedPositions = new HashSet<Vector3>();
+    private readonly PieceMovement _pieceMovement;
 
     private int _currentPlayerIndex;
+    private GameObject _selectedPiece;
 
     public PieceController(int numberOfRings = 3, List<Vector3> positionOfSpots = null)
     {
@@ -17,22 +18,62 @@ public class PieceController
             new Player("Player 2", Resources.Load<GameObject>("P2"), numberOfRings * 3)
         };
 
-        _mainCamera = Camera.main;    
+        _pieceMovement = new PieceMovement(positionOfSpots); // Initialize movement helper
     }
+
+    /// <summary>
+    /// Selects or places a piece based on the mouse position.
+    /// </summary>
+    private void SelectPiece(GameObject piece)
+    {
+        Player currentPlayer = _players[_currentPlayerIndex]; // Get the current player
+
+        // Check if the piece belongs to the current player
+        if (piece.transform.name == currentPlayer.playerName)
+        {
+            DeselectPreviousPiece(); // Deselect the previous piece
+            _pieceMovement.EnablePieceSelection(piece, currentPlayer); // Enable selection in movement helper
+            _selectedPiece = piece; // Set the selected piece
+        }
+        else
+        {
+            Debug.Log("This piece doesn't belong to the current player."); // Log error
+        }
+    }
+
+    /// <summary>
+    /// Deselects the previously selected piece.
+    /// </summary>
+    private void DeselectPreviousPiece()
+    {
+        if (_selectedPiece != null)
+        {
+            _selectedPiece.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false; // Disable piece visibility
+        }
+    }
+
 
     /// <summary>
     /// Places a piece based on the mouse position.
     /// </summary>
-    public void TryToPlacePiece(Vector3 position)
+    public void SelectOrPlacePiece(Vector3 position)
     {
-        RaycastHit2D hitSpot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot"));
-        if (hitSpot.collider != null)
+        RaycastHit2D hitPiece = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Piece"));
+        if (hitPiece.collider != null && !AnyPiecesLeft()) // If no pieces are left
         {
-            PlacePiece(hitSpot.collider.transform.position);
+            SelectPiece(hitPiece.collider.gameObject); // Select the piece
         }
         else
         {
-            Debug.Log("Invalid selection.");
+            RaycastHit2D hitSpot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot"));
+            if (hitSpot.collider != null)
+            {
+                PlacePiece(hitSpot.collider.transform.position); // Place the piece
+            }
+            else
+            {
+                Debug.Log("Invalid selection.");
+            }
         }
     }
 
@@ -47,7 +88,12 @@ public class PieceController
         if (hit.collider != null && hit.collider.CompareTag("Spot") && !_occupiedPositions.Contains(hit.transform.position))
         {
             Debug.Log($"Hit {hit.collider.name} at {hit.collider.transform.position}");
-            if (_players[_currentPlayerIndex].remainingPieces > 0)
+            if (_selectedPiece != null)
+            {
+                // Move the selected piece
+                _pieceMovement.MoveSelectedPiece(_selectedPiece, hit.collider.transform.position, _occupiedPositions, SwitchPlayer);
+            }
+            else if (_players[_currentPlayerIndex].remainingPieces > 0)
             {
                 PlaceNewPiece(hit.collider.transform.position); // Place a new piece
             }
