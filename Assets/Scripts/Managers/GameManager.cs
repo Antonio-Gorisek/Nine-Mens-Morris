@@ -4,13 +4,11 @@ public class GameManager : Singleton<GameManager>
 {
     public BoardGenerate board;
     public PieceController piece;
-
-    [Range(1, 10)]
-    [SerializeField] private int _numberOfRings;
-    public void Start()
+    
+    public void LoadBoard()
     {
-        board = new BoardGenerate(_numberOfRings);
-        piece = new PieceController(_numberOfRings, board.ListOfSpots);
+        board = new BoardGenerate(PlayerPrefs.GetInt("Rings"));
+        piece = new PieceController(PlayerPrefs.GetInt("Rings"), board.ListOfSpots);
         piece.MillDetected += Piece_millDetected;
     }
 
@@ -22,6 +20,9 @@ public class GameManager : Singleton<GameManager>
 
     private void Update()
     {
+        if (board == null || piece == null)
+            return;
+
         PlayerController.Instance.HandleInput(piece);
     }
 }
