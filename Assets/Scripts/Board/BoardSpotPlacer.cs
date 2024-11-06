@@ -6,15 +6,13 @@ public class BoardSpotPlacer
     private readonly GameObject circleSpot;
     private readonly Transform parent;
     private readonly int numberOfRings;
-    private readonly float spacing;
 
     public List<Vector3> ListOfSpots = new List<Vector3>();
 
-    public BoardSpotPlacer(GameObject circleSpot, Transform parent, int numberOfRings, float spacing)
+    public BoardSpotPlacer(GameObject circleSpot, Transform parent, int numberOfRings)
     {
         this.numberOfRings = numberOfRings;
         this.circleSpot = circleSpot;
-        this.spacing = spacing;
         this.parent = parent;
     }
 

@@ -14,7 +14,7 @@ public class Player
         playerName = name;
         piecePrefab = prefab;
         piecesOnBoard = 0;
-        this.remainingPieces = maxPieces;
+        remainingPieces = maxPieces;
         this.maxPieces = maxPieces;
     }
 }

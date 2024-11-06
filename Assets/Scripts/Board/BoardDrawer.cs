@@ -6,13 +6,11 @@ public class BoardDrawer
     private readonly LineRenderer lineRendererPrefab;
     private readonly Transform parent;
     private readonly int numberOfRings;
-    private readonly float spacing;
 
-    public BoardDrawer(LineRenderer lineRendererPrefab, Transform parent, float spacing, int numberOfRings)
+    public BoardDrawer(LineRenderer lineRendererPrefab, Transform parent, int numberOfRings)
     {
         this.lineRendererPrefab = lineRendererPrefab;
         this.parent = parent;
-        this.spacing = spacing;
         this.numberOfRings = numberOfRings;
     }
 
@@ -21,9 +19,8 @@ public class BoardDrawer
     /// </summary>
     public void DrawBoard()
     {
-        for (int i = 0; i <= numberOfRings; i++)
+        for (int size = 0; size <= numberOfRings; size++)
         {
-            float size = i * spacing;
             Vector2[] squarePoints = new Vector2[]
             {
                 new (-size, size), // Top-left corner
@@ -39,10 +36,37 @@ public class BoardDrawer
             // If there is only one ring, draw the diagonal lines
             if (numberOfRings == 1)
             {
-               DrawDiagonals(size);
+                DrawMiddleAndDiagonalLines();
             }
         }
         DrawMiddleLines(); // Draw the middle lines for the board
+    }
+
+    /// <summary>
+    /// Draws all middle and diagonal lines for the board.
+    /// </summary>
+    private void DrawMiddleAndDiagonalLines()
+    {
+        float size = numberOfRings;
+        // Define all the lines to be drawn from the center
+        Vector2[][] lines = new Vector2[][]
+        {
+            // Middle lines (horizontal and vertical)
+            new Vector2[] { new (-size, 0), new (size, 0) }, // Horizontal
+            new Vector2[] { new (0, -size), new (0, size) },  // Vertical
+
+            // Diagonal lines
+            new Vector2[] { new (0, 0), new (size, size) },  // Top-right diagonal
+            new Vector2[] { new (0, 0), new (-size, size) }, // Top-left diagonal
+            new Vector2[] { new (0, 0), new (size, -size) }, // Bottom-right diagonal
+            new Vector2[] { new (0, 0), new (-size, -size) }  // Bottom-left diagonal
+        };
+
+        // Draw each line
+        foreach (var line in lines)
+        {
+            DrawLine(line);
+        }
     }
 
     /// <summary>
@@ -50,36 +74,20 @@ public class BoardDrawer
     /// </summary>
     private void DrawMiddleLines()
     {
+        float size = numberOfRings;
         // Define the positions for the middle lines
         Vector2[][] middleLines = new Vector2[][]
         {
-            new Vector2[] { new (-numberOfRings * spacing, 0), new (-spacing, 0) },
-            new Vector2[] { new (numberOfRings * spacing, 0), new (spacing, 0) },
-            new Vector2[] { new (0, numberOfRings * spacing), new (0, spacing)  },
-            new Vector2[] { new (0, -numberOfRings * spacing), new (0, -spacing)  }
+            new Vector2[] { new (-size, 0), new (-1, 0) },
+            new Vector2[] { new (size, 0), new (1, 0) },
+            new Vector2[] { new (0, size), new (0, 1)  },
+            new Vector2[] { new (0, -size), new (0, -1)  }
         };
 
         // Draw each middle line
         foreach (var line in middleLines)
         {
             DrawLine(line);
-        }
-    }
-
-    /// <summary>
-    /// Draws diagonal lines on the board if there is only one ring.
-    /// </summary>
-    private void DrawDiagonals(float size)
-    {
-        // Define the diagonal line endpoints
-        Vector2[] diagonalLines = new Vector2[] {
-            new (-size, size), new (size, -size),
-            new (size, size), new (-size, -size)
-        };
-
-        // Draw each diagonal line
-        for (int i = 0; i < diagonalLines.Length; i += 2) {
-            DrawLine(new Vector2[] { diagonalLines[i], diagonalLines[i + 1] });
         }
     }
 
