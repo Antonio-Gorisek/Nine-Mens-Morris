@@ -22,8 +22,8 @@ public class PieceController
     {
         _players = new Player[]
         {
-            new Player("Player 1", Resources.Load<GameObject>("P1"), numberOfRings * 3),
-            new Player("Player 2", Resources.Load<GameObject>("P2"), numberOfRings * 3)
+            new Player(PlayerPrefs.GetString("Player1_Name"), Resources.Load<GameObject>("P1"), numberOfRings * 3),
+            new Player(PlayerPrefs.GetString("Player2_Name"), Resources.Load<GameObject>("P2"), numberOfRings * 3)
         };
 
         _lineDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
