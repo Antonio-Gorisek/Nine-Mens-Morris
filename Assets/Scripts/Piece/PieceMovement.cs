@@ -19,12 +19,12 @@ public class PieceMovement
     /// <summary>
     /// Moves the selected piece to a new position if the path is clear.
     /// </summary>
-    public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer)
+    public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer, Player player)
     {
         if (_pieceMoving == true)
             return;
 
-        if (IsPathClear(selectedPiece.transform.position, newPosition, occupiedPositions))
+        if (IsPathClear(selectedPiece.transform.position, newPosition, player))
         {
             GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, occupiedPositions, onMillDetected, onSwitchPlayer));
         }
@@ -46,8 +46,13 @@ public class PieceMovement
     /// <summary>
     /// Checks if the path from start to end is clear for movement.
     /// </summary>
-    private bool IsPathClear(Vector3 start, Vector3 end, HashSet<Vector3> occupiedPositions)
+    private bool IsPathClear(Vector3 start, Vector3 end, Player player)
     {
+        if(player.piecesOnBoard + player.remainingPieces == 3)
+        {
+            return true;
+        }
+
         Vector3 direction = end - start; // Calculate movement direction
         float distance = direction.magnitude; // Get the distance
 
