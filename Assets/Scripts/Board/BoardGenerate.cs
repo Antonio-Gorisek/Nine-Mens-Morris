@@ -8,16 +8,14 @@ public class BoardGenerate
     private readonly GameObject _boardParentObj;
     private readonly Camera _mainCamera;
 
-    private readonly float _ringsSpacing;
     private readonly int _numberOfRings;
 
     public List<Vector3> ListOfSpots = new List<Vector3>();
 
-    public BoardGenerate(int rings = 3, float spacing = 1)
+    public BoardGenerate(int rings = 3)
     {
         // if numberOfRings is below 1, sets it to 3 (default).
         _numberOfRings = rings <= 0 ? 3 : rings;
-        _ringsSpacing = spacing;
 
         // LineRenderer and GameObject from the Resources folder for the visual elements.
         _lineRendererPrefab = Resources.Load<LineRenderer>("Game/Line");
@@ -46,10 +44,10 @@ public class BoardGenerate
     {
         // Adjusts the camera settings based on the number of rings and spacing
         // Ensures the map size always stays within the camera's frame
-        CameraController.AdjustCamera(_mainCamera, _numberOfRings, _ringsSpacing);
+        CameraController.AdjustCamera(_mainCamera, _numberOfRings);
 
-        BoardDrawer boardDrawer = new BoardDrawer(_lineRendererPrefab, _boardParentObj.transform, _ringsSpacing, _numberOfRings);
-        BoardSpotPlacer buttonPlacer = new BoardSpotPlacer(_circleSpot, _boardParentObj.transform, _numberOfRings, _ringsSpacing);
+        BoardDrawer boardDrawer = new BoardDrawer(_lineRendererPrefab, _boardParentObj.transform, _numberOfRings);
+        BoardSpotPlacer buttonPlacer = new BoardSpotPlacer(_circleSpot, _boardParentObj.transform, _numberOfRings);
 
         boardDrawer.DrawBoard();
         buttonPlacer.PlaceCircleButtons();

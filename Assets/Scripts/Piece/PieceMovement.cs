@@ -4,25 +4,29 @@ using UnityEngine;
 
 public class PieceMovement
 {
-    public List<Vector3> positionOfSpots = new List<Vector3>();
+    private readonly List<Vector3> positionOfSpots = new List<Vector3>();
+    private readonly PieceMillDetector lineDetector;
+    private readonly int _numberOfRings;
     private bool _pieceMoving;
 
-    public PieceMovement(List<Vector3> positionOfSpots)
+    public PieceMovement(PieceMillDetector lineDetector, List<Vector3> positionOfSpots, int _numberOfRings)
     {
+        this.lineDetector = lineDetector;
         this.positionOfSpots = positionOfSpots;
+        this._numberOfRings = _numberOfRings;
     }
 
     /// <summary>
     /// Moves the selected piece to a new position if the path is clear.
     /// </summary>
-    public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, HashSet<Vector3> occupiedPositions, System.Action onSwitchPlayer)
+    public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer)
     {
         if (_pieceMoving == true)
             return;
 
-        if (IsPathClear(selectedPiece.transform.position, newPosition))
+        if (IsPathClear(selectedPiece.transform.position, newPosition, occupiedPositions))
         {
-            GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, occupiedPositions, onSwitchPlayer));
+            GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, occupiedPositions, onMillDetected, onSwitchPlayer));
         }
         else
         {
@@ -42,7 +46,7 @@ public class PieceMovement
     /// <summary>
     /// Checks if the path from start to end is clear for movement.
     /// </summary>
-    private bool IsPathClear(Vector3 start, Vector3 end)
+    private bool IsPathClear(Vector3 start, Vector3 end, HashSet<Vector3> occupiedPositions)
     {
         Vector3 direction = end - start; // Calculate movement direction
         float distance = direction.magnitude; // Get the distance
@@ -55,19 +59,19 @@ public class PieceMovement
             // Allow diagonal movement only if moving from or to the center
             if ((start == Vector3.zero && positionOfSpots.Contains(end)) || (end == Vector3.zero && positionOfSpots.Contains(start)))
             {
-                return true;
+                return true; // Diagonal movement is valid
             }
             else
             {
-                Debug.Log("Diagonal movement is not allowed.");
+                Debug.Log("Diagonal movement is not allowed."); // Log if diagonal movement is invalid
                 return false;
             }
         }
 
-        // Prevent movement between center and side positions
-        if ((start == Vector3.zero && IsSidePosition(end)) || (end == Vector3.zero && IsSidePosition(start)))
+        // Prevent movement towards the center (0, 0, 0)
+        if (_numberOfRings > 1 && IsPlayerCrossingCenter(start, end))
         {
-            Debug.Log("Movement between center and side positions is not allowed.");
+            Debug.Log("Path is blocked or invalid.");
             return false;
         }
 
@@ -92,44 +96,54 @@ public class PieceMovement
         }
 
         Debug.Log("Path is clear");
-        return true;
+        return true; // Path is clear
     }
 
-    /// <summary>
-    /// Checks if the specified position is a side position.
-    /// </summary>
-    private bool IsSidePosition(Vector3 position)
+    public bool IsPlayerCrossingCenter(Vector3 A, Vector3 B)
     {
-        return Mathf.Approximately(Vector3.Distance(Vector3.zero, position), 1f); // Check if distance to center is approximately 1
+        // Check if A and B are on opposite sides of the origin (0, 0) on both x and y axes.
+        // If the product of their coordinates on either axis is <= 0, the line crosses that axis.
+        return (A.x * B.x <= 0) && (A.y * B.y <= 0);
     }
 
     /// <summary>
     /// Animates the movement of the selected piece to a new position.
     /// </summary>
-    private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onSwitchPlayer)
+    private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer)
     {
         _pieceMoving = true;
-        float movementSpeed = 5f;
+        float speed = 5f;
         float distance = Vector3.Distance(selectedPiece.transform.position, targetPosition); // Distance to move
-        float duration = distance / movementSpeed; // Duration of movement
-        float elapsedTime = 0f; // Time elapsed during movement
+        float duration = distance / speed;
+        float elapsedTime = 0f;
 
         Vector3 startingPosition = selectedPiece.transform.position; // Starting position of the piece
         occupiedPositions.Remove(startingPosition); // Remove old position from occupied
 
         while (elapsedTime < duration)
         {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / duration;
-            selectedPiece.transform.position = Vector3.Lerp(startingPosition, targetPosition, t);
+            elapsedTime += Time.deltaTime; // Increment elapsed time
+            float t = elapsedTime / duration; // Calculate interpolation factor
+            selectedPiece.transform.position = Vector3.Lerp(startingPosition, targetPosition, t); // Move piece
             yield return null;
         }
 
         selectedPiece.transform.position = targetPosition; // Snap to target position
         occupiedPositions.Add(targetPosition); // Mark new position as occupied
 
-        DeselectCurrentPiece(selectedPiece); // Deselect piece after movement
-        onSwitchPlayer.Invoke(); // Switch to the next player
+        // Check if moving to this position creates a mill
+        if (lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
+        {
+            onMillDetected.Invoke();
+            Debug.Log($"Mill detected after moving {selectedPiece.name} to {targetPosition}.");
+        }
+        else
+        {
+            Debug.Log($"No mill detected after moving {selectedPiece.name} to {targetPosition}.");
+        }
+
+        DeselectCurrentPiece(selectedPiece);
+        onSwitchPlayer.Invoke();
         _pieceMoving = false;
     }
 
