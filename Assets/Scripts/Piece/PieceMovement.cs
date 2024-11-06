@@ -21,7 +21,8 @@ public class PieceMovement
     /// </summary>
     public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer, Player player)
     {
-        if (_pieceMoving == true)
+        // Check if a piece is already moving, if so, prevent any new movement
+        if (_pieceMoving)
             return;
 
         if (IsPathClear(selectedPiece.transform.position, newPosition, player))
@@ -35,10 +36,14 @@ public class PieceMovement
     }
 
     /// <summary>
-    /// Enables the selection visual for the specified piece.
+    /// Enables the selection visual for the specified piece, only if no piece is moving.
     /// </summary>
     public void EnablePieceSelection(GameObject piece, Player player)
     {
+        // Prevent selection if a piece is already moving
+        if (_pieceMoving)
+            return;
+
         piece.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
         Debug.Log($"{player.playerName} selected their piece.");
     }
@@ -48,7 +53,7 @@ public class PieceMovement
     /// </summary>
     private bool IsPathClear(Vector3 start, Vector3 end, Player player)
     {
-        if(player.piecesOnBoard + player.remainingPieces == 3)
+        if (player.piecesOnBoard + player.remainingPieces == 3)
         {
             return true;
         }
@@ -116,7 +121,7 @@ public class PieceMovement
     /// </summary>
     private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer)
     {
-        _pieceMoving = true;
+        _pieceMoving = true; // Mark the piece as moving
         float speed = 5f;
         float distance = Vector3.Distance(selectedPiece.transform.position, targetPosition); // Distance to move
         float duration = distance / speed;
@@ -149,7 +154,7 @@ public class PieceMovement
 
         DeselectCurrentPiece(selectedPiece);
         onSwitchPlayer.Invoke();
-        _pieceMoving = false;
+        _pieceMoving = false; // Mark movement as complete
     }
 
     /// <summary>
