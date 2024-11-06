@@ -98,7 +98,7 @@ public class PieceController
             if (_selectedPiece != null)
             {
                 // Move the selected piece
-                _pieceMovement.MoveSelectedPiece(_selectedPiece, hit.collider.transform.position, _occupiedPositions, TriggerMillDetected, SwitchPlayer);
+                _pieceMovement.MoveSelectedPiece(_selectedPiece, hit.collider.transform.position, _occupiedPositions, TriggerMillDetected, SwitchPlayer, _players[_currentPlayerIndex]);
             }
             else if (_players[_currentPlayerIndex].remainingPieces > 0)
             {
