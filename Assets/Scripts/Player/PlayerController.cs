@@ -6,18 +6,23 @@ public class PlayerController : Singleton<PlayerController>
     private bool _removeOpponentPiece;
 
     private void Awake() => _camera = Camera.main;
+
     public void OpponentPieceRemoved() => _removeOpponentPiece = false;
     public void RemoveOpponentPiece() => _removeOpponentPiece = true;
 
+    // Handles player input when clicking the mouse
     public void HandleInput(PieceController piece)
     {
         if (Input.GetMouseButtonDown(0))
         {
+            // Get the world position corresponding to the mouse position on screen
             Vector3 worldPosition = GetMouseWorldPosition();
 
+            // If the _removeOpponentPiece is true, remove the opponent's piece at the mouse position
             if (_removeOpponentPiece)
                 piece.RemoveOpponentPiece(worldPosition);
             else
+                // Otherwise, select or place a piece at the mouse position
                 piece.SelectOrPlacePiece(worldPosition);
         }
     }
@@ -31,4 +36,3 @@ public class PlayerController : Singleton<PlayerController>
         return _camera.ScreenToWorldPoint(mousePosition);
     }
 }
-

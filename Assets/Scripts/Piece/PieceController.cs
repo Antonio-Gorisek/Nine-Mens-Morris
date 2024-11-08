@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class PieceController
 {
-    public delegate void MillDetection();
-    public event MillDetection MillDetected; // Event to notify when a mill is detected
+    public delegate void MillDetection(string name);
+    public event MillDetection MillDetected;
 
     private GameObject _selectedPiece;
     private int _currentPlayerIndex;
@@ -22,12 +22,16 @@ public class PieceController
     {
         _players = new Player[]
         {
-            new Player(PlayerPrefs.GetString("Player1_Name"), Resources.Load<GameObject>("P1"), numberOfRings * 3),
-            new Player(PlayerPrefs.GetString("Player2_Name"), Resources.Load<GameObject>("P2"), numberOfRings * 3)
+            new Player(PlayerPrefs.GetString("PlayerName_1"), 
+            Resources.Load<GameObject>($"Pieces/{PlayerPrefs.GetString("PlayerColor_1")}"), numberOfRings * 3),
+
+            new Player(PlayerPrefs.GetString("PlayerName_2"), 
+            Resources.Load<GameObject>($"Pieces/{PlayerPrefs.GetString("PlayerColor_2")}"), numberOfRings * 3)
         };
 
         _lineDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
         _pieceMovement = new PieceMovement(_lineDetector, positionOfSpots, numberOfRings);
+        Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
 
     /// <summary>
@@ -46,10 +50,6 @@ public class PieceController
         if (hitSpot.collider != null)
         {
             PlacePiece(hitSpot.collider.transform.position); // Place the piece
-        }
-        else
-        {
-            Debug.Log("Invalid selection.");
         }
     }
 
@@ -94,12 +94,17 @@ public class PieceController
         // Check if the hit spot is valid and not occupied
         if (hit.collider != null && hit.collider.CompareTag("Spot") && !_occupiedPositions.Contains(hit.transform.position))
         {
-            Debug.Log($"Hit {hit.collider.name} at {hit.collider.transform.position}");
             if (_selectedPiece != null)
             {
                 // Move the selected piece
-                _pieceMovement.MoveSelectedPiece(_selectedPiece, hit.collider.transform.position, _occupiedPositions, TriggerMillDetected, SwitchPlayer, _players[_currentPlayerIndex]);
-
+                _pieceMovement.MoveSelectedPiece(
+                    _selectedPiece,
+                    hit.collider.transform.position,
+                    _occupiedPositions,
+                    () => TriggerMillDetected(_players[_currentPlayerIndex].playerName),
+                    SwitchPlayer,
+                    _players[_currentPlayerIndex]
+                );
                 _selectedPiece = null;
             }
             else if (_players[_currentPlayerIndex].remainingPieces > 0)
@@ -125,15 +130,19 @@ public class PieceController
         _players[_currentPlayerIndex].remainingPieces--;
         _players[_currentPlayerIndex].piecesOnBoard++;
 
+        PieceAnimation playerPieceAnimation = piece.GetComponent<PieceAnimation>();
+         playerPieceAnimation.StartPlaceAnimation(position);
+
         _lineDetector.SetOwner(position, _players[_currentPlayerIndex].playerName); // Set the piece owner
 
         SwitchPlayer(); // Switch to the next player
-
         // Check if placing the piece creates a mill
         if (_lineDetector.IsMill(position, piece.name, _occupiedPositions))
         {
-            TriggerMillDetected(); // Trigger mill detected event
+            TriggerMillDetected(piece.name); // Trigger mill detected event
         }
+
+
     }
 
     /// <summary>
@@ -173,14 +182,22 @@ public class PieceController
         PlayerController.Instance.OpponentPieceRemoved();
 
         Debug.Log($"{opponentPlayer.playerName}'s piece at {position} was removed.");
-
+        Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
         // Check for win condition
         if (opponentPlayer.piecesOnBoard + opponentPlayer.remainingPieces < 3)
         {
-            Debug.Log($"{currentPlayer.playerName} wins!");
+            PlayerWin(currentPlayer.playerName);
         }
+
     }
 
+
+    private void PlayerWin(string name)
+    {
+        GameObject obj = Object.Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
+        obj.GetComponent<AnimationPopup>().ShowPopup();
+        Debug.Log($"{name} wins!");
+    }
 
     /// <summary>
     /// Switches the current player to the next player.
@@ -189,6 +206,7 @@ public class PieceController
     {
         _currentPlayerIndex = (_currentPlayerIndex + 1) % _players.Length; // Update player index
         Debug.Log($"It's {_players[_currentPlayerIndex].playerName}'s turn.");
+        Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
 
     /// <summary>
@@ -202,8 +220,9 @@ public class PieceController
     /// <summary>
     /// Triggers the mill detected event.
     /// </summary>
-    public void TriggerMillDetected()
+    /// <param name="name">The name of the player.</param>
+    public void TriggerMillDetected(string name)
     {
-        MillDetected?.Invoke();
+        MillDetected?.Invoke(name);  // Pass the name when invoking the event
     }
 }
