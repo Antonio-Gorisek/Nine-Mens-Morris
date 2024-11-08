@@ -29,7 +29,7 @@ public class PieceMovement
 
         if (IsPathClear(selectedPiece.transform.position, newPosition, player))
         {
-            GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, occupiedPositions, onMillDetected, onSwitchPlayer));
+            GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, occupiedPositions, onMillDetected, onSwitchPlayer, _lineDetector));
         }
         else
         {
@@ -126,7 +126,7 @@ public class PieceMovement
     /// <summary>
     /// Animates the movement of the selected piece to a new position.
     /// </summary>
-    private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer)
+    private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer, PieceMillDetector lineDetector)
     {
         _pieceMoving = true; // Mark the piece as moving
         float speed = 5f;
@@ -138,6 +138,7 @@ public class PieceMovement
 
         Vector3 startingPosition = selectedPiece.transform.position; // Starting position of the piece
         occupiedPositions.Remove(startingPosition); // Remove old position from occupied
+        lineDetector.RemoveOwner(selectedPiece.transform.position);
 
         while (elapsedTime < duration)
         {
@@ -149,11 +150,13 @@ public class PieceMovement
 
         selectedPiece.transform.position = targetPosition; // Snap to target position
         occupiedPositions.Add(targetPosition); // Mark new position as occupied
+        lineDetector.SetOwner(targetPosition, selectedPiece.name);
 
         // Check if moving to this position creates a mill
         if (_lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
         {
             onMillDetected.Invoke();
+            Info.Instance.Message($"<color=yellow>{selectedPiece.name}</color> formed a mill! <color=red>Remove a piece.</color>");
             Debug.Log($"Mill detected after moving {selectedPiece.name} to {targetPosition}.");
         }
         else

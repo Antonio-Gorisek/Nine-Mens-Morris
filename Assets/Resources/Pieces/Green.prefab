@@ -224,9 +224,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f42f32c3a8d072848b4f08f50bef60f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startPosition: {x: 5, y: 5, z: 0}
-  moveDuration: 0.3
-  fadeDuration: 0.3
+  _startPosition: {x: 5, y: 5, z: 0}
+  _moveDuration: 0.3
+  _fadeDuration: 0.3
   isAnimating: 0
 --- !u!114 &1731974148955682913
 MonoBehaviour:
