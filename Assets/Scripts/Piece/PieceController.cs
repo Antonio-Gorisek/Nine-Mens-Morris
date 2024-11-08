@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PieceController
 {
@@ -14,6 +17,7 @@ public class PieceController
     private readonly PieceMillDetector _lineDetector;
     private readonly PieceMovement _pieceMovement;
 
+    public GameObject boardParent;
     /// <summary>
     /// Constructor for PieceController class.
     /// Initializes players and necessary components.
@@ -41,6 +45,7 @@ public class PieceController
         _lineDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
         _pieceMovement = new PieceMovement(_lineDetector, positionOfSpots, numberOfRings);
 
+        boardParent = GameObject.Find("Board");
         // Announce the starting player's turn
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
@@ -155,7 +160,7 @@ public class PieceController
     /// </summary>
     private void PlaceNewPiece(Vector3 position)
     {
-        GameObject piece = Object.Instantiate(_players[_currentPlayerIndex].piecePrefab, position, Quaternion.identity);
+        GameObject piece = Object.Instantiate(_players[_currentPlayerIndex].piecePrefab, position, Quaternion.identity, boardParent.transform);
         piece.name = _players[_currentPlayerIndex].playerName;
 
         _occupiedPositions.Add(position); // Mark the position as occupied
@@ -226,15 +231,55 @@ public class PieceController
 
     }
 
-
+    /// <summary>
+    /// Handles the logic when a player wins the game.
+    /// Instantiates the "GameOver" popup and sets up the exit button and message.
+    /// </summary>
     private void PlayerWin(string name)
     {
+        // Instantiate the "GameOver" popup and set its parent to the canvas
         GameObject obj = Object.Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
+
+        // Show the popup animation
         obj.GetComponent<AnimationPopup>().ShowPopup();
+
+        // Setup the exit popup with the player's name
+        SetupExitPopup(obj, name);
+
+        // Destroying the game board
+        Object.Destroy(boardParent);
+
         Debug.Log($"{name} wins!");
         AudioManager.PlayFromResources(Sounds.YouWin, 0.7f);
         AudioManager.StopAudioClip("Melody");
+    }
 
+    /// <summary>
+    /// Sets up the game over popup with the player's name and exit button functionality.
+    /// </summary>
+    private void SetupExitPopup(GameObject obj, string name)
+    {
+        GameObject btn_Exit = null;
+        GameObject txt_Message = null;
+
+        // Loop through children of the popup and find the exit button and message text
+        foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == "Btn_Back")
+            {
+                btn_Exit = child.gameObject;
+            }
+            if (child.name == "Txt_Message")
+            {
+                txt_Message = child.gameObject;
+            }
+        }
+
+        // Set the congratulatory message text for the winner
+        txt_Message.GetComponent<TMP_Text>().text = $"CONGRATULATIONS\r\nPLAYER\r\n<color=yellow>{name}</color> WON!";
+
+        // Add listener to the exit button to load the main menu when clicked
+        btn_Exit.GetComponent<Button>().onClick.AddListener(() => MenuManager.Instance.LoadMainMenu());
     }
 
     /// <summary>
