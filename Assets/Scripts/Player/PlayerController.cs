@@ -2,10 +2,9 @@ using UnityEngine;
 
 public class PlayerController : Singleton<PlayerController>
 {
-    private Camera _camera;
-    private bool _removeOpponentPiece;
+    [SerializeField] private Camera _camera;
 
-    private void Awake() => _camera = Camera.main;
+    private bool _removeOpponentPiece;
 
     public void OpponentPieceRemoved() => _removeOpponentPiece = false;
     public void RemoveOpponentPiece() => _removeOpponentPiece = true;

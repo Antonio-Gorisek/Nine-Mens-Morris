@@ -164,6 +164,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51b7583a6c3b3f347af49deb863371dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _useEditorSettings: 0
+  _numberOfRings: 1
+  _player1Name: Player1
+  _player2Name: Player2
 --- !u!114 &57741118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,6 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ca63e97be3d7c247ac619be72e9c1a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camera: {fileID: 519420031}
 --- !u!1 &109533096
 GameObject:
   m_ObjectHideFlags: 0
