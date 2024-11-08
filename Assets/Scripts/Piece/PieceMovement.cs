@@ -61,7 +61,7 @@ public class PieceMovement
     /// </summary>
     private bool IsPathClear(Vector3 start, Vector3 end, Player player)
     {
-        if (player.piecesOnBoard + player.remainingPieces == 3)
+        if (player.piecesOnBoard + player.remainingPieces == 3 && _numberOfRings >= 3)
         {
             return true;
         }
@@ -132,22 +132,21 @@ public class PieceMovement
     /// </summary>
     private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer, PieceMillDetector lineDetector)
     {
-        _pieceMoving = true; // Mark the piece as moving
-        float speed = 5f;
-        float distance = Vector3.Distance(selectedPiece.transform.position, targetPosition); // Distance to move
-        float duration = distance / speed;
-        float elapsedTime = 0f;
+        _pieceMoving = true;
+        float animationDuration = 0.5f; // Constant duration for the movement
 
         AudioManager.PlayFromResources(Sounds.PieceMove, 0.15f, 1.2f);
 
         Vector3 startingPosition = selectedPiece.transform.position; // Starting position of the piece
         occupiedPositions.Remove(startingPosition); // Remove old position from occupied
-        lineDetector.RemoveOwner(selectedPiece.transform.position);
+        lineDetector.RemoveOwner(startingPosition);
 
-        while (elapsedTime < duration)
+        float elapsedTime = 0f;
+
+        while (elapsedTime < animationDuration)
         {
             elapsedTime += Time.deltaTime; // Increment elapsed time
-            float t = elapsedTime / duration; // Calculate interpolation factor
+            float t = elapsedTime / animationDuration; // Calculate interpolation factor
             selectedPiece.transform.position = Vector3.Lerp(startingPosition, targetPosition, t); // Move piece
             yield return null;
         }
@@ -157,7 +156,7 @@ public class PieceMovement
         lineDetector.SetOwner(targetPosition, selectedPiece.name);
 
         onSwitchPlayer.Invoke();
-        
+
         // Check if moving to this position creates a mill
         if (_lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
         {
@@ -171,7 +170,7 @@ public class PieceMovement
         }
 
         DeselectCurrentPiece(selectedPiece);
-        _pieceMoving = false; // Mark movement as complete
+        _pieceMoving = false;
     }
 
     /// <summary>

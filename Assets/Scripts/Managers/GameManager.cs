@@ -13,7 +13,7 @@ public class GameManager : Singleton<GameManager>
 
 
     // Play the background melody on loop with specified volume and pitch
-    private void Awake() => AudioManager.PlayFromResources(Sounds.Melody, 0.2f, 1, true);
+    private void Awake() => AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
 
 
     // Loads the game board and pieces
