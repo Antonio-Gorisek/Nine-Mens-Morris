@@ -5,6 +5,13 @@ public class GameManager : Singleton<GameManager>
     public BoardGenerate board;
     public PieceController piece;
 
+    public bool _useEditorSettings = false;
+    [Range(1, 10)] [SerializeField] private int _numberOfRings = 1;
+
+    public string _player1Name = "Player1";
+    public string _player2Name = "Player2";
+
+
     // Play the background melody on loop with specified volume and pitch
     private void Awake() => AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
 
@@ -17,10 +24,10 @@ public class GameManager : Singleton<GameManager>
             return;
 
         // Generates the game board based on the number of "Rings"
-        board = new BoardGenerate(PlayerPrefs.GetInt("Rings"));
+        board = new BoardGenerate(_useEditorSettings ? _numberOfRings : PlayerPrefs.GetInt("Rings"));
 
         // Stores the piece data based on the number of rings (size of the board)
-        piece = new PieceController(PlayerPrefs.GetInt("Rings"), board.ListOfSpots);
+        piece = new PieceController(_useEditorSettings ? _numberOfRings : PlayerPrefs.GetInt("Rings"), board.ListOfSpots);
 
         // Subscribe to the event that is triggered when a mill (three pieces in a row) is formed
         piece.MillDetected += Piece_millDetected;

@@ -3,7 +3,6 @@ using UnityEngine.Events;
 
 public class AnimationEvent : MonoBehaviour
 {
-    [Header("Settings")]
     [SerializeField] private Sounds _sound = new Sounds();
     [SerializeField] private float _audioVolume = 0.5f;
     [SerializeField] private float _minPitch = 0.8f;

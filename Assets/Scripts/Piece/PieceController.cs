@@ -15,24 +15,55 @@ public class PieceController
     private readonly PieceMovement _pieceMovement;
 
     /// <summary>
-    /// Constructor for PiecePlacement class.
+    /// Constructor for PieceController class.
     /// Initializes players and necessary components.
     /// </summary>
     public PieceController(int numberOfRings = 3, List<Vector3> positionOfSpots = null)
     {
+        GameManager gameManager = GameManager.Instance;
+
+        // Use settings from GameManager or PlayerPrefs depending on the configuration
+        bool useEditorSettings = gameManager._useEditorSettings;
+        string player1Name = GetPlayerName(gameManager, useEditorSettings, 1);
+        string player2Name = GetPlayerName(gameManager, useEditorSettings, 2);
+
+        GameObject player1Piece = LoadPlayerPiece(1);
+        GameObject player2Piece = LoadPlayerPiece(2);
+
+        // Initialize players with their respective pieces and ring counts
         _players = new Player[]
         {
-            new Player(PlayerPrefs.GetString("PlayerName_1"), 
-            Resources.Load<GameObject>($"Pieces/{PlayerPrefs.GetString("PlayerColor_1")}"), numberOfRings * 3),
-
-            new Player(PlayerPrefs.GetString("PlayerName_2"), 
-            Resources.Load<GameObject>($"Pieces/{PlayerPrefs.GetString("PlayerColor_2")}"), numberOfRings * 3)
+            new Player(player1Name, player1Piece, numberOfRings * 3),
+            new Player(player2Name, player2Piece, numberOfRings * 3)
         };
 
+        // Initialize movement and detection components
         _lineDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
         _pieceMovement = new PieceMovement(_lineDetector, positionOfSpots, numberOfRings);
+
+        // Announce the starting player's turn
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
+
+    /// <summary>
+    /// Helper method to get the player's name, either from GameManager or PlayerPrefs.
+    /// </summary>
+    private string GetPlayerName(GameManager gameManager, bool useEditorSettings, int playerIndex)
+    {
+        return useEditorSettings ?
+            (playerIndex == 1 ? gameManager._player1Name : gameManager._player2Name) :
+            PlayerPrefs.GetString($"PlayerName_{playerIndex}");
+    }
+
+    /// <summary>
+    /// Helper method to load the player's piece from resources.
+    /// </summary>
+    private GameObject LoadPlayerPiece(int playerIndex)
+    {
+        string playerColor = PlayerPrefs.GetString($"PlayerColor_{playerIndex}");
+        return Resources.Load<GameObject>($"Pieces/{playerColor}");
+    }
+
 
     /// <summary>
     /// Selects or places a piece based on the mouse position.
