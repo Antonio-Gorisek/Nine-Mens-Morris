@@ -1,18 +1,20 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class PieceMovement
 {
-    private readonly List<Vector3> positionOfSpots = new List<Vector3>();
-    private readonly PieceMillDetector lineDetector;
+    private readonly List<Vector3> _positionOfSpots = new List<Vector3>();
+    private readonly PieceMillDetector _lineDetector;
     private readonly int _numberOfRings;
+
+    private GameObject _selectedPiece;
     private bool _pieceMoving;
 
     public PieceMovement(PieceMillDetector lineDetector, List<Vector3> positionOfSpots, int _numberOfRings)
     {
-        this.lineDetector = lineDetector;
-        this.positionOfSpots = positionOfSpots;
+        this._lineDetector = lineDetector;
+        this._positionOfSpots = positionOfSpots;
         this._numberOfRings = _numberOfRings;
     }
 
@@ -44,6 +46,11 @@ public class PieceMovement
         if (_pieceMoving)
             return;
 
+        if (_selectedPiece != null)
+        { DeselectCurrentPiece(_selectedPiece); }
+
+
+        _selectedPiece = piece;
         piece.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = true;
         Debug.Log($"{player.playerName} selected their piece.");
     }
@@ -67,7 +74,7 @@ public class PieceMovement
         if (Mathf.Abs(direction.x) > 0 && Mathf.Abs(direction.y) > 0)
         {
             // Allow diagonal movement only if moving from or to the center
-            if ((start == Vector3.zero && positionOfSpots.Contains(end)) || (end == Vector3.zero && positionOfSpots.Contains(start)))
+            if ((start == Vector3.zero && _positionOfSpots.Contains(end)) || (end == Vector3.zero && _positionOfSpots.Contains(start)))
             {
                 return true; // Diagonal movement is valid
             }
@@ -127,6 +134,8 @@ public class PieceMovement
         float duration = distance / speed;
         float elapsedTime = 0f;
 
+        AudioManager.PlayFromResources(Sounds.PieceMove, 0.15f, 1.2f);
+
         Vector3 startingPosition = selectedPiece.transform.position; // Starting position of the piece
         occupiedPositions.Remove(startingPosition); // Remove old position from occupied
 
@@ -142,7 +151,7 @@ public class PieceMovement
         occupiedPositions.Add(targetPosition); // Mark new position as occupied
 
         // Check if moving to this position creates a mill
-        if (lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
+        if (_lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
         {
             onMillDetected.Invoke();
             Debug.Log($"Mill detected after moving {selectedPiece.name} to {targetPosition}.");
@@ -163,5 +172,6 @@ public class PieceMovement
     private void DeselectCurrentPiece(GameObject selectedPiece)
     {
         selectedPiece.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
+        _selectedPiece = null;
     }
 }

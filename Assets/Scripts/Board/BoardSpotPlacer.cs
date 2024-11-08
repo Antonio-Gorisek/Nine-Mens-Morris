@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class BoardSpotPlacer
 {
-    private readonly GameObject circleSpot;
-    private readonly Transform parent;
-    private readonly int numberOfRings;
+    private readonly GameObject _circleSpot;
+    private readonly Transform _parent;
+    private readonly int _numberOfRings;
 
     public List<Vector3> ListOfSpots = new List<Vector3>();
 
     public BoardSpotPlacer(GameObject circleSpot, Transform parent, int numberOfRings)
     {
-        this.numberOfRings = numberOfRings;
-        this.circleSpot = circleSpot;
-        this.parent = parent;
+        this._numberOfRings = numberOfRings;
+        this._circleSpot = circleSpot;
+        this._parent = parent;
     }
 
     /// <summary>
@@ -21,7 +21,7 @@ public class BoardSpotPlacer
     /// </summary>
     public void PlaceCircleButtons()
     {
-        for (int size = 1; size <= numberOfRings; size++)
+        for (int size = 1; size <= _numberOfRings; size++)
         {
             // Place buttons at the corners of the current ring
             PlaceButtons(new Vector3[]
@@ -43,7 +43,7 @@ public class BoardSpotPlacer
         }
 
         // If there is only one ring, add the center point (0, 0, 0)
-        if (numberOfRings == 1)
+        if (_numberOfRings == 1)
         {
             PlaceButtons(new Vector3[] { Vector3.zero });
         }
@@ -57,8 +57,8 @@ public class BoardSpotPlacer
     {
         foreach (var position in positions)
         {
-            GameObject circleButton = Object.Instantiate(circleSpot, position, Quaternion.identity);
-            circleButton.transform.SetParent(parent);
+            GameObject circleButton = Object.Instantiate(_circleSpot, position, Quaternion.identity);
+            circleButton.transform.SetParent(_parent);
             ListOfSpots.Add(circleButton.transform.position);
         }
     }

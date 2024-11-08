@@ -3,15 +3,15 @@ using UnityEngine;
 
 public class BoardDrawer
 {
-    private readonly LineRenderer lineRendererPrefab;
-    private readonly Transform parent;
-    private readonly int numberOfRings;
+    private readonly LineRenderer _lineRendererPrefab;
+    private readonly Transform _parent;
+    private readonly int _numberOfRings;
 
     public BoardDrawer(LineRenderer lineRendererPrefab, Transform parent, int numberOfRings)
     {
-        this.lineRendererPrefab = lineRendererPrefab;
-        this.parent = parent;
-        this.numberOfRings = numberOfRings;
+        this._lineRendererPrefab = lineRendererPrefab;
+        this._parent = parent;
+        this._numberOfRings = numberOfRings;
     }
 
     /// <summary>
@@ -19,7 +19,7 @@ public class BoardDrawer
     /// </summary>
     public void DrawBoard()
     {
-        for (int size = 0; size <= numberOfRings; size++)
+        for (int size = 0; size <= _numberOfRings; size++)
         {
             Vector2[] squarePoints = new Vector2[]
             {
@@ -34,7 +34,7 @@ public class BoardDrawer
             DrawLine(squarePoints);
 
             // If there is only one ring, draw the diagonal lines
-            if (numberOfRings == 1)
+            if (_numberOfRings == 1)
             {
                 DrawMiddleAndDiagonalLines();
             }
@@ -47,7 +47,7 @@ public class BoardDrawer
     /// </summary>
     private void DrawMiddleAndDiagonalLines()
     {
-        float size = numberOfRings;
+        float size = _numberOfRings;
         // Define all the lines to be drawn from the center
         Vector2[][] lines = new Vector2[][]
         {
@@ -74,7 +74,7 @@ public class BoardDrawer
     /// </summary>
     private void DrawMiddleLines()
     {
-        float size = numberOfRings;
+        float size = _numberOfRings;
         // Define the positions for the middle lines
         Vector2[][] middleLines = new Vector2[][]
         {
@@ -96,7 +96,7 @@ public class BoardDrawer
     /// </summary>
     private void DrawLine(Vector2[] positions)
     {
-        LineRenderer line = Object.Instantiate(lineRendererPrefab, parent); // Create a new line renderer
+        LineRenderer line = Object.Instantiate(_lineRendererPrefab, _parent); // Create a new line renderer
         line.positionCount = positions.Length; // Set the number of positions for the line
 
         // Convert Vector2[] to Vector3[] using LINQ
