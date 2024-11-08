@@ -20,6 +20,7 @@ public class PieceAnimation : MonoBehaviour
     {
         _targetPosition = target;
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _startPosition = new Vector3(Random.Range(-5, 5), Random.Range(-5, 5), 0);
         transform.position = _startPosition;
         _spriteRenderer.color = new Color(1, 1, 1, 0); // Set the initial alpha to 0 for fade-in effect
         StartCoroutine(AnimatePiece()); // Start the animation coroutine

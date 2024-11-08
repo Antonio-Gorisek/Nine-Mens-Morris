@@ -31,6 +31,16 @@ public class PieceMillDetector
     public void SetOwner(Vector3 position, string playerName) 
         => _ownerMap[position] = playerName;
 
+    /// <summary>
+    /// Removes the owner of a position on the board.
+    /// </summary>
+    public void RemoveOwner(Vector3 position)
+    {
+        if (_ownerMap.ContainsKey(position))
+        {
+            _ownerMap.Remove(position); // Removes the entry for the specified position
+        }
+    }
 
     /// <summary>
     /// Checks for a horizontal or vertical mill centered around the specified position
