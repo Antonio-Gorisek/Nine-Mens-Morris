@@ -34,6 +34,7 @@ public class PieceMovement
         else
         {
             Debug.Log("Path is blocked or invalid.");
+            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
         }
     }
 
@@ -81,6 +82,7 @@ public class PieceMovement
             else
             {
                 Debug.Log("Diagonal movement is not allowed."); // Log if diagonal movement is invalid
+                AudioManager.PlayFromResources(Sounds.Error, 0.5f);
                 return false;
             }
         }
@@ -89,6 +91,7 @@ public class PieceMovement
         if (_numberOfRings > 1 && IsPlayerCrossingCenter(start, end))
         {
             Debug.Log("Path is blocked or invalid.");
+            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
             return false;
         }
 
@@ -107,6 +110,7 @@ public class PieceMovement
                 if (spotCount > 1) // More than one spot hit indicates a blockage
                 {
                     Debug.Log("Path blocked by multiple spots");
+                    AudioManager.PlayFromResources(Sounds.Error, 0.5f);
                     return false;
                 }
             }
@@ -152,6 +156,8 @@ public class PieceMovement
         occupiedPositions.Add(targetPosition); // Mark new position as occupied
         lineDetector.SetOwner(targetPosition, selectedPiece.name);
 
+        onSwitchPlayer.Invoke();
+        
         // Check if moving to this position creates a mill
         if (_lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
         {
@@ -165,7 +171,6 @@ public class PieceMovement
         }
 
         DeselectCurrentPiece(selectedPiece);
-        onSwitchPlayer.Invoke();
         _pieceMoving = false; // Mark movement as complete
     }
 

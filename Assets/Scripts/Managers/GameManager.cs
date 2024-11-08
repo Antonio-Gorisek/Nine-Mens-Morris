@@ -38,6 +38,8 @@ public class GameManager : Singleton<GameManager>
         // Display a message
         Info.Instance.Message($"<color=yellow>{name}</color> formed a mill! <color=red>Remove a piece.</color>");
         Debug.Log($"{name} formed a mill! Remove a piece.");
+
+        AudioManager.PlayFromResources(Sounds.Mill, 0.5f);
     }
 
     private void Update()

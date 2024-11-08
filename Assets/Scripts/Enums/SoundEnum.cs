@@ -11,5 +11,9 @@ public enum Sounds
     Melody,
     PiecePlace,
     PieceMove,
-    Swipe
+    PieceRemove,
+    Swipe,
+    YouWin,
+    Error,
+    Mill
 };
