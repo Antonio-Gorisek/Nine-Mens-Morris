@@ -47,7 +47,7 @@ public class MenuManager : Singleton<MenuManager>
             return;
 
         // Instantiate the transition object from Resources and destroy it after 2 seconds
-        AudioManager.PlayFromResources(Sounds.Melody, 0.2f, 1, true);
+        AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
 
         _transitionObj = Instantiate(Resources.Load<GameObject>("Menu/Transition"));
         Destroy(_transitionObj, 2);
@@ -86,8 +86,19 @@ public class MenuManager : Singleton<MenuManager>
     /// <param name="value">The state of the background melody (true = muted, false = unmuted)</param>
     public void MelodyDisable(bool value)
     {
-        GameObject.Find("Melody").GetComponent<AudioSource>().mute = value;
-        _melodyDisable = value;
+        GameObject melody = GameObject.Find("Melody");
+        if (melody != null)
+        {
+            GameObject.Find("Melody").GetComponent<AudioSource>().mute = value;
+            _melodyDisable = value;
+        }
+        else
+        {
+            if(value)
+            {
+                AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
+            }
+        }
     }
 
     // Opens the settings menu by instantiating a settings popup
