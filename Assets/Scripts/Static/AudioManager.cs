@@ -50,10 +50,7 @@ public static class AudioManager
     {
         GameObject soundGameObject = GameObject.Find(soundFileName);
         if (soundGameObject == null || !soundGameObject.activeInHierarchy)
-        {
-            Debug.LogError($"Sound clip with name {soundFileName} not found or not active.");
             return;
-        }
 
         AudioSource soundSource = soundGameObject.GetComponent<AudioSource>();
         if (soundSource != null)

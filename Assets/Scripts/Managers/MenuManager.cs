@@ -41,6 +41,31 @@ public class MenuManager : Singleton<MenuManager>
         Invoke(nameof(LoadGame), 0.5f);
     }
 
+    public void LoadMainMenu()
+    {
+        if (_transitionObj != null)
+            return;
+
+        // Instantiate the transition object from Resources and destroy it after 2 seconds
+        AudioManager.PlayFromResources(Sounds.Melody, 0.2f, 1, true);
+
+        _transitionObj = Instantiate(Resources.Load<GameObject>("Menu/Transition"));
+        Destroy(_transitionObj, 2);
+
+        // After a short delay, load the game UI and board
+        Invoke(nameof(LoadMenu), 0.5f);
+
+    }
+
+    // Loads the game UI and board, hides the menu UI
+    private void LoadMenu()
+    {
+        _menuUI.gameObject.SetActive(true);
+        _gameUI.gameObject.SetActive(false);
+        GameManager.Instance.DestroyBoard();
+    }
+
+
     // Loads the game UI and board, hides the menu UI
     private void LoadGame()
     {

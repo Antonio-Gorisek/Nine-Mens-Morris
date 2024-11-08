@@ -13,7 +13,7 @@ public class GameManager : Singleton<GameManager>
 
 
     // Play the background melody on loop with specified volume and pitch
-    private void Awake() => AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
+    private void Awake() => AudioManager.PlayFromResources(Sounds.Melody, 0.2f, 1, true);
 
 
     // Loads the game board and pieces
@@ -33,6 +33,12 @@ public class GameManager : Singleton<GameManager>
         piece.MillDetected += Piece_millDetected;
     }
 
+    public void DestroyBoard()
+    {
+        Destroy(piece.boardParent);
+        piece.MillDetected -= Piece_millDetected;
+        board = null; piece = null;
+    }
     /// <summary>
     /// This method is called when a mill is detected (three pieces in a row).
     /// </summary>
