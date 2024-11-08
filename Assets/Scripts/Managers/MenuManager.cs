@@ -14,6 +14,7 @@ public class MenuManager : Singleton<MenuManager>
 
     private GameObject _transitionObj;
     private GameObject _settingsObj;
+    private GameObject _quitObj;
 
     [HideInInspector] public bool _melodyDisable;
     [HideInInspector] public bool _sfxDisable;
@@ -43,7 +44,7 @@ public class MenuManager : Singleton<MenuManager>
 
     public void LoadMainMenu()
     {
-        if (_transitionObj != null)
+        if (_quitObj || _settingsObj || _transitionObj)
             return;
 
         // Instantiate the transition object from Resources and destroy it after 2 seconds
@@ -56,6 +57,22 @@ public class MenuManager : Singleton<MenuManager>
         Invoke(nameof(LoadMenu), 0.5f);
 
     }
+
+
+    public void RestartCurrentLevel()
+    {
+        AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
+
+        GameManager.Instance.DestroyBoard();
+
+        Invoke(nameof(LoadBoardWithDelay), 0.5f);
+    }
+
+    /// <summary>
+    /// The delay is set to prevent the board's line renderer and spots from overlapping the UI.
+    /// </summary>
+    private void LoadBoardWithDelay() => GameManager.Instance.LoadBoard();
+
 
     // Loads the game UI and board, hides the menu UI
     private void LoadMenu()
@@ -105,7 +122,7 @@ public class MenuManager : Singleton<MenuManager>
     private void Settings()
     {
         // Prevent multiple instantiations of the settings popup
-        if (_settingsObj != null)
+        if (_quitObj || _settingsObj || _transitionObj)
             return;
 
         _settingsObj = Instantiate(Resources.Load<GameObject>("Menu/Popup/Settings"), _canvas);
@@ -126,13 +143,16 @@ public class MenuManager : Singleton<MenuManager>
     // Shows a confirmation popup to quit the game
     public void QuitGamePopup()
     {
+        if (_quitObj || _settingsObj || _transitionObj)
+            return;
+
         // Instantiate the exit game popup
-        GameObject obj = Instantiate(Resources.Load<GameObject>("Menu/Popup/ExitGame"), _canvas);
-        obj.GetComponent<AnimationPopup>().ShowPopup(); // Show the popup with animation
+        _quitObj = Instantiate(Resources.Load<GameObject>("Menu/Popup/ExitGame"), _canvas);
+        _quitObj.GetComponent<AnimationPopup>().ShowPopup(); // Show the popup with animation
 
         // Find the "Btn_Exit" button inside the popup and add a listener to exit the game
         GameObject exitGame = null;
-        foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
+        foreach (Transform child in _quitObj.GetComponentsInChildren<Transform>(true))
         {
             if (child.name == "Btn_Exit")
             {

@@ -242,8 +242,13 @@ public class PieceController
         // Show the popup animation
         obj.GetComponent<AnimationPopup>().ShowPopup();
 
-        // Setup the exit popup with the player's name
-        SetupExitPopup(obj, name);
+        // Setup the exit popup window
+        if (obj.TryGetComponent<GameOver>(out var gameOver))
+        {
+            gameOver.SetBackToMenuButtonEvent(() => MenuManager.Instance.LoadMainMenu());
+            gameOver.SetRestartButtonEvent(() => MenuManager.Instance.RestartCurrentLevel());
+            gameOver.SetWinnerText(name);
+        }
 
         // Destroying the game board
         Object.Destroy(boardParent);
@@ -251,34 +256,6 @@ public class PieceController
         Debug.Log($"{name} wins!");
         AudioManager.PlayFromResources(Sounds.YouWin, 0.7f);
         AudioManager.StopAudioClip("Melody");
-    }
-
-    /// <summary>
-    /// Sets up the game over popup with the player's name and exit button functionality.
-    /// </summary>
-    private void SetupExitPopup(GameObject obj, string name)
-    {
-        GameObject btn_Exit = null;
-        GameObject txt_Message = null;
-
-        // Loop through children of the popup and find the exit button and message text
-        foreach (Transform child in obj.GetComponentsInChildren<Transform>(true))
-        {
-            if (child.name == "Btn_Back")
-            {
-                btn_Exit = child.gameObject;
-            }
-            if (child.name == "Txt_Message")
-            {
-                txt_Message = child.gameObject;
-            }
-        }
-
-        // Set the congratulatory message text for the winner
-        txt_Message.GetComponent<TMP_Text>().text = $"CONGRATULATIONS\r\nPLAYER\r\n<color=yellow>{name}</color> WON!";
-
-        // Add listener to the exit button to load the main menu when clicked
-        btn_Exit.GetComponent<Button>().onClick.AddListener(() => MenuManager.Instance.LoadMainMenu());
     }
 
     /// <summary>
