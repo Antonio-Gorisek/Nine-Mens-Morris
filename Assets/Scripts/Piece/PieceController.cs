@@ -105,6 +105,7 @@ public class PieceController
                     SwitchPlayer,
                     _players[_currentPlayerIndex]
                 );
+                DeselectPreviousPiece();
                 _selectedPiece = null;
             }
             else if (_players[_currentPlayerIndex].remainingPieces > 0)
@@ -171,7 +172,9 @@ public class PieceController
         // Check if the piece is part of a mill and prevent removal if it is
         if (_lineDetector.IsMill(piece.transform.position, opponentPlayer.playerName, _occupiedPositions))
         {
-            Debug.Log("Cannot remove this piece as it is part of a mill.");
+            Debug.Log("Cannot remove that piece, it's part of a mill.");
+            Info.Instance.Message("<color=red>Cannot remove that piece, it's part of a mill.</color>");
+            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
             return;
         }
 
@@ -183,6 +186,7 @@ public class PieceController
 
         Debug.Log($"{opponentPlayer.playerName}'s piece at {position} was removed.");
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
+        AudioManager.PlayFromResources(Sounds.PieceRemove, 0.5f);
         // Check for win condition
         if (opponentPlayer.piecesOnBoard + opponentPlayer.remainingPieces < 3)
         {
@@ -197,6 +201,9 @@ public class PieceController
         GameObject obj = Object.Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
         obj.GetComponent<AnimationPopup>().ShowPopup();
         Debug.Log($"{name} wins!");
+        AudioManager.PlayFromResources(Sounds.YouWin, 0.7f);
+        AudioManager.StopAudioClip("Melody");
+
     }
 
     /// <summary>
