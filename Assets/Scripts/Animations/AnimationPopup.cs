@@ -13,12 +13,12 @@ public class AnimationPopup : MonoBehaviour
 
     public void ShowPopup() => StartCoroutine(PopupAnim(true));
 
-    public void HidePopup() => StartCoroutine(PopupAnim(false));
+    public void HidePopup(bool destroyParent = false) => StartCoroutine(PopupAnim(false, destroyParent));
 
     /// <summary>
     /// Coroutine to handle both showing and hiding animations
     /// </summary>
-    private IEnumerator PopupAnim(bool isShowing)
+    private IEnumerator PopupAnim(bool isShowing, bool destroyParent = false)
     {
         if (_isAnimating)
             yield return null;
@@ -44,6 +44,6 @@ public class AnimationPopup : MonoBehaviour
         _isAnimating = false;
 
         if (isShowing == false)
-            Destroy(gameObject);
+            Destroy(destroyParent ? gameObject.transform.parent.gameObject : gameObject);
     }
 }
