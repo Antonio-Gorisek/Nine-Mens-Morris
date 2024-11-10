@@ -808,9 +808,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4505396849567470345}
-        m_TargetAssemblyTypeName: PopupAnimation, Assembly-CSharp
+        m_TargetAssemblyTypeName: AnimationPopup, Assembly-CSharp
         m_MethodName: HidePopup
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -1076,9 +1076,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4505396849567470345}
-        m_TargetAssemblyTypeName: PopupAnimation, Assembly-CSharp
+        m_TargetAssemblyTypeName: AnimationPopup, Assembly-CSharp
         m_MethodName: HidePopup
-        m_Mode: 1
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
