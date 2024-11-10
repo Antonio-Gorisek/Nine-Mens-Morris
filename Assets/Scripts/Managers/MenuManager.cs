@@ -50,6 +50,8 @@ public class MenuManager : Singleton<MenuManager>
         // Instantiate the transition object from Resources and destroy it after 2 seconds
         AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
 
+        PlayerController.Instance.OpponentPieceRemoved();
+
         _transitionObj = Instantiate(Resources.Load<GameObject>("Menu/Transition"));
         Destroy(_transitionObj, 2);
 
@@ -64,6 +66,8 @@ public class MenuManager : Singleton<MenuManager>
         AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
 
         GameManager.Instance.DestroyBoard();
+
+        PlayerController.Instance.OpponentPieceRemoved();
 
         Invoke(nameof(LoadBoardWithDelay), 0.5f);
     }
