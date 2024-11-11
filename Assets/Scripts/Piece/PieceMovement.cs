@@ -158,7 +158,7 @@ public class PieceMovement
         onSwitchPlayer.Invoke();
 
         // Check if moving to this position creates a mill
-        if (_lineDetector.IsMill(targetPosition, selectedPiece.name, occupiedPositions))
+        if (_lineDetector.IsMill(targetPosition, selectedPiece.name))
         {
             onMillDetected.Invoke();
             Info.Instance.Message($"<color=yellow>{selectedPiece.name}</color> formed a mill! <color=red>Remove a piece.</color>");

@@ -15,6 +15,7 @@ public class PieceController
     private readonly PieceMovement _pieceMovement;
 
     public GameObject boardParent;
+
     /// <summary>
     /// Constructor for PieceController class.
     /// Initializes players and necessary components.
@@ -171,7 +172,7 @@ public class PieceController
 
         SwitchPlayer(); // Switch to the next player
         // Check if placing the piece creates a mill
-        if (_lineDetector.IsMill(position, piece.name, _occupiedPositions))
+        if (_lineDetector.IsMill(position, piece.name))
         {
             TriggerMillDetected(piece.name); // Trigger mill detected event
         }
@@ -184,48 +185,77 @@ public class PieceController
     /// </summary>
     public void RemoveOpponentPiece(Vector3 position)
     {
-        RaycastHit2D hitPiece = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Piece"));
+        // Try to find the opponent's piece at the given position
+        GameObject piece = GetPieceAtPosition(position);
+        if (piece == null) return;
 
-        if (hitPiece.collider == null)
-        {
-            Debug.Log("No piece found at the selected position to remove.");
-            return;
-        }
-
-        GameObject piece = hitPiece.collider.gameObject;
         Player opponentPlayer = _players[_currentPlayerIndex];
         Player currentPlayer = _players[(_currentPlayerIndex + 1) % _players.Length];
 
-        if (piece.transform.name != opponentPlayer.playerName)
-        {
-            Debug.Log("Selected piece does not belong to the opponent.");
-            return;
-        }
+        // Check if the piece belongs to the opponent
+        if (!IsOpponentPiece(piece, opponentPlayer)) return;
 
-        // Check if the piece is part of a mill and prevent removal if it is
-        if (_lineDetector.IsMill(piece.transform.position, opponentPlayer.playerName, _occupiedPositions))
-        {
-            Debug.Log("Cannot remove that piece, it's part of a mill.");
-            Info.Instance.Message("<color=red>Cannot remove that piece, it's part of a mill.</color>");
-            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
-            return;
-        }
+        // Check if the piece is part of a mill
+        if (IsPieceInMill(piece, opponentPlayer)) return;
 
-        // Remove the piece and update game state
-        _occupiedPositions.Remove(piece.transform.position);
-        Object.Destroy(piece);
-        opponentPlayer.piecesOnBoard--;
-        PlayerController.Instance.OpponentPieceRemoved();
+        // Proceed with removing the piece
+        RemovePiece(piece, opponentPlayer);
 
-        Debug.Log($"{opponentPlayer.playerName}'s piece at {position} was removed.");
-        Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
-        AudioManager.PlayFromResources(Sounds.PieceRemove, 0.5f);
-        // Check for win condition
+        // Check if the opponent has fewer than 3 pieces remaining
         if (opponentPlayer.piecesOnBoard + opponentPlayer.remainingPieces < 3)
         {
             PlayerWin(currentPlayer.playerName);
         }
+    }
 
+    // Method to find the piece at the given position
+    private GameObject GetPieceAtPosition(Vector3 position)
+    {
+        RaycastHit2D hitPiece = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Piece"));
+        if (hitPiece.collider == null)
+        {
+            Debug.Log("No piece found at the selected position to remove.");
+            return null;
+        }
+        return hitPiece.collider.gameObject;
+    }
+
+    // Method to check if the piece belongs to the opponent
+    private bool IsOpponentPiece(GameObject piece, Player opponentPlayer)
+    {
+        if (piece.transform.name != opponentPlayer.playerName)
+        {
+            Debug.Log("Selected piece does not belong to the opponent.");
+            return false;
+        }
+        return true;
+    }
+
+    // Method to check if the piece is part of a mill
+    private bool IsPieceInMill(GameObject piece, Player opponentPlayer)
+    {
+        if (_lineDetector.IsMill(piece.transform.position, opponentPlayer.playerName))
+        {
+            Debug.Log("Cannot remove that piece, it's part of a mill.");
+            Info.Instance.Message("<color=red>Cannot remove that piece, it's part of a mill.</color>");
+            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
+            return true;
+        }
+        return false;
+    }
+
+    // Method to remove the piece and update the game state
+    private void RemovePiece(GameObject piece, Player opponentPlayer)
+    {
+        _occupiedPositions.Remove(piece.transform.position);
+        Object.Destroy(piece);
+        opponentPlayer.piecesOnBoard--;
+        PlayerController.Instance.OpponentPieceRemoved();
+        _lineDetector.RemoveOwner(piece.transform.position);
+
+        Debug.Log($"{opponentPlayer.playerName}'s piece at {piece.transform.position} was removed.");
+        Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
+        AudioManager.PlayFromResources(Sounds.PieceRemove, 0.5f);
     }
 
     /// <summary>

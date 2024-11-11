@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// The AudioManager class manages audio playback in Unity.
 /// It allows playing sounds from the Resources folder or AudioClip objects,
 /// with options for volume, pitch, and looping. It also supports fade-out 
 /// effects for smooth audio transitions.
