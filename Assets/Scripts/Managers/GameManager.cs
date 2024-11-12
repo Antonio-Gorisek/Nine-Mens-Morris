@@ -35,7 +35,7 @@ public class GameManager : Singleton<GameManager>
 
     public void DestroyBoard()
     {
-        Destroy(piece.boardParent);
+        Destroy(GameObject.Find("Board"));
         piece.MillDetected -= Piece_millDetected;
         board = null; piece = null;
     }
@@ -53,6 +53,34 @@ public class GameManager : Singleton<GameManager>
         Debug.Log($"{name} formed a mill! Remove a piece.");
 
         AudioManager.PlayFromResources(Sounds.Mill, 0.5f);
+    }
+
+    /// <summary>
+    /// Handles the logic when a player wins the game.
+    /// Instantiates the "GameOver" popup and sets up the exit button and message.
+    /// </summary>
+    public void PlayerWin(string name)
+    {
+        // Instantiate the "GameOver" popup and set its parent to the canvas
+        GameObject obj = Object.Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
+
+        // Show the popup animation
+        obj.GetComponent<AnimationPopup>().ShowPopup();
+
+        // Setup the exit popup window
+        if (obj.TryGetComponent<GameOver>(out var gameOver))
+        {
+            gameOver.SetBackToMenuButtonEvent(() => MenuManager.Instance.LoadMainMenu());
+            gameOver.SetRestartButtonEvent(() => MenuManager.Instance.RestartCurrentLevel());
+            gameOver.SetWinnerText(name);
+        }
+
+        // Destroying the game board
+        Object.Destroy(GameObject.Find("Board"));
+
+        Debug.Log($"{name} wins!");
+        AudioManager.PlayFromResources(Sounds.YouWin, 0.7f);
+        AudioManager.StopAudioClip("Melody");
     }
 
     private void Update()

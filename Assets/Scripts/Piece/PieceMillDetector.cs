@@ -42,6 +42,12 @@ public class PieceMillDetector
         => _ownerMap[position] = playerName;
 
     /// <summary>
+    /// Sets the owner of a specific board position (used to track piece ownership)
+    /// </summary>
+    public Dictionary<Vector3, string> GetOwners()
+        { return _ownerMap; }
+
+    /// <summary>
     /// Removes the owner from a specific position on the board.
     /// </summary>
     public void RemoveOwner(Vector3 position)
