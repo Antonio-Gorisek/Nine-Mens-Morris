@@ -6,15 +6,17 @@ public class PieceController
     public delegate void MillDetection(string name);
     public event MillDetection MillDetected;
 
+    private PieceAnimation playerPieceAnimation;
     private GameObject _selectedPiece;
     private int _currentPlayerIndex;
 
     private readonly Player[] _players;
-    private readonly HashSet<Vector3> _occupiedPositions = new HashSet<Vector3>();
-    private readonly PieceMillDetector _lineDetector;
+    private readonly PieceMillDetector _pieceMillDetector;
     private readonly PieceMovement _pieceMovement;
 
-    public GameObject boardParent;
+    private readonly List<Vector3> _positionOfSpots = new List<Vector3>();
+
+    private readonly int _numberOfRings;
 
     /// <summary>
     /// Constructor for PieceController class.
@@ -40,10 +42,11 @@ public class PieceController
         };
 
         // Initialize movement and detection components
-        _lineDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
-        _pieceMovement = new PieceMovement(_lineDetector, positionOfSpots, numberOfRings);
+        _pieceMillDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
+        _pieceMovement = new PieceMovement(_pieceMillDetector, positionOfSpots, numberOfRings, _players);
 
-        boardParent = GameObject.Find("Board");
+        _positionOfSpots = positionOfSpots;
+        _numberOfRings = numberOfRings;
         // Announce the starting player's turn
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
@@ -100,6 +103,8 @@ public class PieceController
             DeselectPreviousPiece();
             _pieceMovement.EnablePieceSelection(piece, currentPlayer);
             _selectedPiece = piece;
+
+            GetAllNeighbors(piece.transform.position);
         }
         else
         {
@@ -107,11 +112,29 @@ public class PieceController
         }
     }
 
+    private string GetAllNeighbors(Vector3 pos)
+    {
+        PieceNeighbors pieceNeighbors = new PieceNeighbors(_pieceMillDetector.GetOwners(), _positionOfSpots, _numberOfRings);
+        List<Vector3> positions = pieceNeighbors.GetAvailableMoves(pos);
+        foreach (var position in positions)
+        {
+            GameObject spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform.gameObject;
+            spot.transform.GetChild(1).transform.gameObject.SetActive(true);
+        }
+        return null;
+    }
+
     /// <summary>
     /// Deselects the previously selected piece.
     /// </summary>
     private void DeselectPreviousPiece()
     {
+        foreach (var position in _positionOfSpots)
+        {
+            GameObject spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform.gameObject;
+            spot.transform.GetChild(1).transform.gameObject.SetActive(false);
+        }
+
         if (_selectedPiece != null)
         {
             _selectedPiece.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
@@ -123,63 +146,65 @@ public class PieceController
     /// </summary>
     private void PlacePiece(Vector3 position)
     {
-        RaycastHit2D hit = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot"));
-
-        // Check if the hit spot is valid and not occupied
-        if (hit.collider != null && hit.collider.CompareTag("Spot") && !_occupiedPositions.Contains(hit.transform.position))
-        {
-            if (_selectedPiece != null)
-            {
-                // Move the selected piece
-                _pieceMovement.MoveSelectedPiece(
-                    _selectedPiece,
-                    hit.collider.transform.position,
-                    _occupiedPositions,
-                    () => TriggerMillDetected(_players[_currentPlayerIndex].playerName),
-                    SwitchPlayer,
-                    _players[_currentPlayerIndex]
-                );
-                DeselectPreviousPiece();
-                _selectedPiece = null;
-            }
-            else if (_players[_currentPlayerIndex].remainingPieces > 0)
-            {
-                PlaceNewPiece(hit.collider.transform.position);
-            }
-        }
-        else
-        {
+        // Check if the spot is valid, not occupied, and no piece is currently moving
+        if (Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).collider == null) {
             Debug.Log("Invalid position or position is occupied.");
+            return;
+        }
+
+        // Check if a piece already exists at the target position
+        if (Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Piece")).collider != null) {
+            Debug.Log("This spot is already occupied by a piece.");
+            return;
+        }
+
+        // Proceed with moving or placing the piece
+        if (_selectedPiece != null)
+        {
+            _pieceMovement.MoveSelectedPiece(_selectedPiece, position, 
+                () => TriggerMillDetected(_players[_currentPlayerIndex].playerName), SwitchPlayer, _players[_currentPlayerIndex]);
+            DeselectPreviousPiece();
+            _selectedPiece = null;
+        }
+        else if (_players[_currentPlayerIndex].remainingPieces > 0)
+        {
+            PlaceNewPiece(position);
         }
     }
+
 
     /// <summary>
     /// Places a new piece at the specified position and updates the game state.
     /// </summary>
     private void PlaceNewPiece(Vector3 position)
     {
-        GameObject piece = Object.Instantiate(_players[_currentPlayerIndex].piecePrefab, position, Quaternion.identity, boardParent.transform);
+        if (playerPieceAnimation != null && playerPieceAnimation.isAnimating)
+            return;
+
+        // Instantiate a new piece
+        GameObject piece = Object.Instantiate(_players[_currentPlayerIndex].piecePrefab, position, Quaternion.identity, GameObject.Find("Board").transform);
         piece.name = _players[_currentPlayerIndex].playerName;
 
-        _occupiedPositions.Add(position); // Mark the position as occupied
+        // Update player stats
         _players[_currentPlayerIndex].remainingPieces--;
         _players[_currentPlayerIndex].piecesOnBoard++;
 
-        PieceAnimation playerPieceAnimation = piece.GetComponent<PieceAnimation>();
-         playerPieceAnimation.StartPlaceAnimation(position);
+        // Ensure PieceAnimation is found and triggered
+        playerPieceAnimation = piece.GetComponent<PieceAnimation>();
+        playerPieceAnimation.StartPlaceAnimation(position);  // Call the animation method
 
-        _lineDetector.SetOwner(position, _players[_currentPlayerIndex].playerName); // Set the piece owner
+        // Set the piece owner in the line detector
+        _pieceMillDetector.SetOwner(position, _players[_currentPlayerIndex].playerName);
 
-        SwitchPlayer(); // Switch to the next player
+        // Switch to the next player
+        SwitchPlayer();
+
         // Check if placing the piece creates a mill
-        if (_lineDetector.IsMill(position, piece.name))
+        if (_pieceMillDetector.IsMill(position, piece.name))
         {
             TriggerMillDetected(piece.name); // Trigger mill detected event
         }
-
-
     }
-
     /// <summary>
     /// Removes an opponent's selected piece from the board, ensuring that it is not part of a mill.
     /// </summary>
@@ -204,7 +229,7 @@ public class PieceController
         // Check if the opponent has fewer than 3 pieces remaining
         if (opponentPlayer.piecesOnBoard + opponentPlayer.remainingPieces < 3)
         {
-            PlayerWin(currentPlayer.playerName);
+            GameManager.Instance.PlayerWin(currentPlayer.playerName);
         }
     }
 
@@ -234,7 +259,7 @@ public class PieceController
     // Method to check if the piece is part of a mill
     private bool IsPieceInMill(GameObject piece, Player opponentPlayer)
     {
-        if (_lineDetector.IsMill(piece.transform.position, opponentPlayer.playerName))
+        if (_pieceMillDetector.IsMill(piece.transform.position, opponentPlayer.playerName))
         {
             Debug.Log("Cannot remove that piece, it's part of a mill.");
             Info.Instance.Message("<color=red>Cannot remove that piece, it's part of a mill.</color>");
@@ -247,44 +272,36 @@ public class PieceController
     // Method to remove the piece and update the game state
     private void RemovePiece(GameObject piece, Player opponentPlayer)
     {
-        _occupiedPositions.Remove(piece.transform.position);
         Object.Destroy(piece);
         opponentPlayer.piecesOnBoard--;
         PlayerController.Instance.OpponentPieceRemoved();
-        _lineDetector.RemoveOwner(piece.transform.position);
+        _pieceMillDetector.RemoveOwner(piece.transform.position);
 
         Debug.Log($"{opponentPlayer.playerName}'s piece at {piece.transform.position} was removed.");
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
         AudioManager.PlayFromResources(Sounds.PieceRemove, 0.5f);
-    }
 
-    /// <summary>
-    /// Handles the logic when a player wins the game.
-    /// Instantiates the "GameOver" popup and sets up the exit button and message.
-    /// </summary>
-    private void PlayerWin(string name)
-    {
-        // Instantiate the "GameOver" popup and set its parent to the canvas
-        GameObject obj = Object.Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
-
-        // Show the popup animation
-        obj.GetComponent<AnimationPopup>().ShowPopup();
-
-        // Setup the exit popup window
-        if (obj.TryGetComponent<GameOver>(out var gameOver))
+        string blockedPlayerName = IsAnyPlayerBlocked(_pieceMillDetector);
+        if (blockedPlayerName != null)
         {
-            gameOver.SetBackToMenuButtonEvent(() => MenuManager.Instance.LoadMainMenu());
-            gameOver.SetRestartButtonEvent(() => MenuManager.Instance.RestartCurrentLevel());
-            gameOver.SetWinnerText(name);
+            GameManager.Instance.PlayerWin(blockedPlayerName);
+            return;
         }
-
-        // Destroying the game board
-        Object.Destroy(boardParent);
-
-        Debug.Log($"{name} wins!");
-        AudioManager.PlayFromResources(Sounds.YouWin, 0.7f);
-        AudioManager.StopAudioClip("Melody");
     }
+
+    private string IsAnyPlayerBlocked(PieceMillDetector lineDetector)
+    {
+        PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), _positionOfSpots, _numberOfRings);
+        foreach (var player in _players)
+        {
+            if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))
+            {
+                return player.playerName;
+            }
+        }
+        return null;
+    }
+
 
     /// <summary>
     /// Switches the current player to the next player.

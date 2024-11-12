@@ -1,35 +1,37 @@
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class PieceMovement
 {
     private readonly List<Vector3> _positionOfSpots = new List<Vector3>();
-    private readonly PieceMillDetector _lineDetector;
+    private readonly PieceMillDetector _pieceMillDetector;
+    private readonly Player[] _players;
     private readonly int _numberOfRings;
 
     private GameObject _selectedPiece;
-    private bool _pieceMoving;
+    public bool _pieceMoving;
 
-    public PieceMovement(PieceMillDetector lineDetector, List<Vector3> positionOfSpots, int _numberOfRings)
+    public PieceMovement(PieceMillDetector lineDetector, List<Vector3> positionOfSpots, int _numberOfRings, Player[] players)
     {
-        this._lineDetector = lineDetector;
+        this._pieceMillDetector = lineDetector;
         this._positionOfSpots = positionOfSpots;
         this._numberOfRings = _numberOfRings;
+        this._players = players;
     }
 
     /// <summary>
     /// Moves the selected piece to a new position if the path is clear.
     /// </summary>
-    public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer, Player player)
-    {
-        // Check if a piece is already moving, if so, prevent any new movement
+    public void MoveSelectedPiece(GameObject selectedPiece, Vector3 newPosition, System.Action onMillDetected, System.Action onSwitchPlayer, Player player)
+    { 
         if (_pieceMoving)
             return;
 
         if (IsPathClear(selectedPiece.transform.position, newPosition, player))
         {
-            GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, occupiedPositions, onMillDetected, onSwitchPlayer, _lineDetector));
+            GameManager.Instance.StartCoroutine(AnimateMovement(selectedPiece, newPosition, onMillDetected, onSwitchPlayer, _pieceMillDetector));
         }
         else
         {
@@ -130,35 +132,42 @@ public class PieceMovement
     /// <summary>
     /// Animates the movement of the selected piece to a new position.
     /// </summary>
-    private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, HashSet<Vector3> occupiedPositions, System.Action onMillDetected, System.Action onSwitchPlayer, PieceMillDetector lineDetector)
+    private IEnumerator AnimateMovement(GameObject selectedPiece, Vector3 targetPosition, System.Action onMillDetected, System.Action onSwitchPlayer, PieceMillDetector lineDetector)
     {
-        _pieceMoving = true;
-        float animationDuration = 0.5f; // Constant duration for the movement
+        if (_pieceMoving) yield break; // Ensures no animation starts if a piece is moving already
 
+        _pieceMoving = true;
+
+        float animationDuration = 0.5f; // Duration of the movement animation
         AudioManager.PlayFromResources(Sounds.PieceMove, 0.15f, 1.2f);
 
-        Vector3 startingPosition = selectedPiece.transform.position; // Starting position of the piece
-        occupiedPositions.Remove(startingPosition); // Remove old position from occupied
+        Vector3 startingPosition = selectedPiece.transform.position;
         lineDetector.RemoveOwner(startingPosition);
 
         float elapsedTime = 0f;
 
         while (elapsedTime < animationDuration)
         {
-            elapsedTime += Time.deltaTime; // Increment elapsed time
-            float t = elapsedTime / animationDuration; // Calculate interpolation factor
-            selectedPiece.transform.position = Vector3.Lerp(startingPosition, targetPosition, t); // Move piece
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / animationDuration;
+            selectedPiece.transform.position = Vector3.Lerp(startingPosition, targetPosition, t);
             yield return null;
         }
 
-        selectedPiece.transform.position = targetPosition; // Snap to target position
-        occupiedPositions.Add(targetPosition); // Mark new position as occupied
+        selectedPiece.transform.position = targetPosition; // Final position snap
         lineDetector.SetOwner(targetPosition, selectedPiece.name);
 
         onSwitchPlayer.Invoke();
 
-        // Check if moving to this position creates a mill
-        if (_lineDetector.IsMill(targetPosition, selectedPiece.name))
+        string blockedPlayerName = IsAnyPlayerBlocked(lineDetector);
+        if (blockedPlayerName != null)
+        {
+            GameManager.Instance.PlayerWin(blockedPlayerName);
+            yield break;
+        }
+
+        // Check for a mill after the move
+        if (_pieceMillDetector.IsMill(targetPosition, selectedPiece.name))
         {
             onMillDetected.Invoke();
             Info.Instance.Message($"<color=yellow>{selectedPiece.name}</color> formed a mill! <color=red>Remove a piece.</color>");
@@ -169,8 +178,23 @@ public class PieceMovement
             Debug.Log($"No mill detected after moving {selectedPiece.name} to {targetPosition}.");
         }
 
+
+
         DeselectCurrentPiece(selectedPiece);
-        _pieceMoving = false;
+        _pieceMoving = false; // Reset after animation ends
+    }
+
+    private string IsAnyPlayerBlocked(PieceMillDetector lineDetector)
+    {
+        PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), _positionOfSpots, _numberOfRings);
+        foreach (var player in _players)
+        {
+            if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))
+            {
+                return player.playerName;
+            }
+        }
+        return null;
     }
 
     /// <summary>
