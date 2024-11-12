@@ -14,11 +14,32 @@ public class GameManager : Singleton<GameManager>
 
     [HideInInspector] public GameObject _gameOverObj;
 
-    // Play the background melody on loop with specified volume and pitch
-    private void Awake() => AudioManager.PlayFromResources(Sound.Melody, 0.3f, 1, true);
+    private void Start()
+    {
+        AudioManager.PlayFromResources(Sound.Melody, 0.3f, 1, true);
+        Application.targetFrameRate = 60;
 
+        SaveDefaultData();
+    }
 
-    // Loads the game board and pieces
+    private void SaveDefaultData()
+    {
+        if (!PlayerPrefs.HasKey("PlayerName_1"))
+            PlayerPrefs.SetString("PlayerName_1", _player1Name);
+
+        if (!PlayerPrefs.HasKey("PlayerName_2"))
+            PlayerPrefs.SetString("PlayerName_2", _player2Name);
+
+        if (!PlayerPrefs.HasKey("PlayerColor_1"))
+            PlayerPrefs.SetString("PlayerColor_1", "Blue");
+
+        if (!PlayerPrefs.HasKey("PlayerColor_2"))
+            PlayerPrefs.SetString("PlayerColor_2", "Gray");
+
+        if (!PlayerPrefs.HasKey("Rings"))
+            PlayerPrefs.SetInt("Rings", 3);
+    }
+
     public void LoadBoard()
     {
         // Ensure that the board and pieces are only loaded once
@@ -44,6 +65,7 @@ public class GameManager : Singleton<GameManager>
         piece.MillDetected -= Piece_millDetected;
         board = null; piece = null;
     }
+
     /// <summary>
     /// This method is called when a mill is detected (three pieces in a row).
     /// </summary>
