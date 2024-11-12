@@ -6,6 +6,8 @@ using UnityEngine;
 /// with options for volume, pitch, and looping. It also supports fade-out 
 /// effects for smooth audio transitions.
 /// </summary>
+/// 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.xfcbsqx34fr1")]
 public static class AudioManager
 {
     /// <summary>
@@ -16,9 +18,9 @@ public static class AudioManager
     /// <param name="pitch">Pitch level of the sound.</param>
     /// <param name="loop">Whether the sound should loop.</param>
     /// <returns>Returns the AudioSource playing the sound.</returns>
-    public static AudioSource PlayFromResources(Sounds soundFileName, float volume = 1.0f, float pitch = 1.0f, bool loop = false)
+    public static AudioSource PlayFromResources(Sound soundFileName, float volume = 1.0f, float pitch = 1.0f, bool loop = false)
     {
-        if (MenuManager.Instance._sfxDisable || soundFileName == Sounds.None)
+        if (MenuManager.Instance._sfxDisable || soundFileName == Sound.None)
             return null;
 
         AudioClip soundClip = Resources.Load<AudioClip>($"Sound Effects/{soundFileName}");

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.m7cniar2755y")]
 public class PieceAnimation : MonoBehaviour
 {
     [SerializeField] private Vector3 _startPosition;
@@ -54,7 +55,7 @@ public class PieceAnimation : MonoBehaviour
         }
 
         // Play the sound effect once the animation is complete
-        AudioManager.PlayFromResources(Sounds.PiecePlace, 0.5f, 1.1f);
+        AudioManager.PlayFromResources(Sound.PiecePlace, 0.5f, 1.1f);
 
         isAnimating = false;
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.6le53bu273f9")]
 public class PlayerColorSelection : MonoBehaviour
 {
     [SerializeField] private Transform _Player1; // Reference to the transform that holds Player 1 color options
@@ -134,6 +135,6 @@ public class PlayerColorSelection : MonoBehaviour
         if (!isActive || disableAudioEffect) return;
 
         // Play a sound effect with random pitch variation
-        AudioManager.PlayFromResources(Sounds.pop, 0.3f, Random.Range(0.8f, 1.2f));
+        AudioManager.PlayFromResources(Sound.pop, 0.3f, Random.Range(0.8f, 1.2f));
     }
 }

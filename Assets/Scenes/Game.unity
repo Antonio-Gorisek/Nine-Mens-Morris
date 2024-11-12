@@ -1157,7 +1157,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1915664910}
         m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
-        m_MethodName: MelodyDisable
+        m_MethodName: MelodyMute
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1690,7 +1690,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1915664910}
         m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
-        m_MethodName: MelodyDisable
+        m_MethodName: MelodyMute
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

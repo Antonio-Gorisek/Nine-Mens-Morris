@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
-using TMPro;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.j0f0otv4rzt6")]
 public class PieceMovement
 {
     private readonly List<Vector3> _positionOfSpots = new List<Vector3>();
@@ -13,11 +13,11 @@ public class PieceMovement
     private GameObject _selectedPiece;
     public bool _pieceMoving;
 
-    public PieceMovement(PieceMillDetector lineDetector, List<Vector3> positionOfSpots, int _numberOfRings, Player[] players)
+    public PieceMovement(PieceMillDetector lineDetector, Board board, Player[] players)
     {
         this._pieceMillDetector = lineDetector;
-        this._positionOfSpots = positionOfSpots;
-        this._numberOfRings = _numberOfRings;
+        this._positionOfSpots = board.PositionOfSpots;
+        this._numberOfRings = board.RingsCount;
         this._players = players;
     }
 
@@ -36,7 +36,7 @@ public class PieceMovement
         else
         {
             Debug.Log("Path is blocked or invalid.");
-            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
+            AudioManager.PlayFromResources(Sound.Error, 0.5f);
         }
     }
 
@@ -45,7 +45,6 @@ public class PieceMovement
     /// </summary>
     public void EnablePieceSelection(GameObject piece, Player player)
     {
-        // Prevent selection if a piece is already moving
         if (_pieceMoving)
             return;
 
@@ -84,7 +83,7 @@ public class PieceMovement
             else
             {
                 Debug.Log("Diagonal movement is not allowed."); // Log if diagonal movement is invalid
-                AudioManager.PlayFromResources(Sounds.Error, 0.5f);
+                AudioManager.PlayFromResources(Sound.Error, 0.5f);
                 return false;
             }
         }
@@ -93,7 +92,7 @@ public class PieceMovement
         if (_numberOfRings > 1 && IsPlayerCrossingCenter(start, end))
         {
             Debug.Log("Path is blocked or invalid.");
-            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
+            AudioManager.PlayFromResources(Sound.Error, 0.5f);
             return false;
         }
 
@@ -112,7 +111,7 @@ public class PieceMovement
                 if (spotCount > 1) // More than one spot hit indicates a blockage
                 {
                     Debug.Log("Path blocked by multiple spots");
-                    AudioManager.PlayFromResources(Sounds.Error, 0.5f);
+                    AudioManager.PlayFromResources(Sound.Error, 0.5f);
                     return false;
                 }
             }
@@ -139,7 +138,7 @@ public class PieceMovement
         _pieceMoving = true;
 
         float animationDuration = 0.5f; // Duration of the movement animation
-        AudioManager.PlayFromResources(Sounds.PieceMove, 0.15f, 1.2f);
+        AudioManager.PlayFromResources(Sound.PieceMove, 0.15f, 1.2f);
 
         Vector3 startingPosition = selectedPiece.transform.position;
         lineDetector.RemoveOwner(startingPosition);
@@ -186,7 +185,8 @@ public class PieceMovement
 
     private string IsAnyPlayerBlocked(PieceMillDetector lineDetector)
     {
-        PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), _positionOfSpots, _numberOfRings);
+        Board board = new Board(_positionOfSpots, _numberOfRings);
+        PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), board);
         foreach (var player in _players)
         {
             if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))

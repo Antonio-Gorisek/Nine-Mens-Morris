@@ -2,6 +2,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.ml1nz46racuq")]
 public class MenuManager : Singleton<MenuManager>
 {
     [SerializeField] private Button _startGame;
@@ -12,7 +13,7 @@ public class MenuManager : Singleton<MenuManager>
     [SerializeField] private Transform _menuUI;
     [SerializeField] private Transform _canvas;
 
-    private GameObject _transitionObj;
+    [HideInInspector] public GameObject _transitionObj { get; private set; }
     private GameObject _settingsObj;
     private GameObject _quitObj;
 
@@ -36,7 +37,8 @@ public class MenuManager : Singleton<MenuManager>
 
         // Instantiate the transition object from Resources and destroy it after 2 seconds
         _transitionObj = Instantiate(Resources.Load<GameObject>("Menu/Transition"));
-        Destroy(_transitionObj, 2);
+        _transitionObj.name = "Transition";
+        Destroy(_transitionObj, 1);
 
         // After a short delay, load the game UI and board
         Invoke(nameof(LoadGame), 0.5f);
@@ -47,13 +49,11 @@ public class MenuManager : Singleton<MenuManager>
         if (_quitObj || _settingsObj || _transitionObj)
             return;
 
-        // Instantiate the transition object from Resources and destroy it after 2 seconds
-        AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
-
         PlayerController.Instance.OpponentPieceRemoved();
 
         _transitionObj = Instantiate(Resources.Load<GameObject>("Menu/Transition"));
-        Destroy(_transitionObj, 2);
+        _transitionObj.name = "Transition";
+        Destroy(_transitionObj, 1);
 
         // After a short delay, load the game UI and board
         Invoke(nameof(LoadMenu), 0.5f);
@@ -63,8 +63,6 @@ public class MenuManager : Singleton<MenuManager>
 
     public void RestartCurrentLevel()
     {
-        AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
-
         GameManager.Instance.DestroyBoard();
 
         PlayerController.Instance.OpponentPieceRemoved();
@@ -84,6 +82,7 @@ public class MenuManager : Singleton<MenuManager>
         _menuUI.gameObject.SetActive(true);
         _gameUI.gameObject.SetActive(false);
         GameManager.Instance.DestroyBoard();
+        MelodyMute(_melodyDisable);
     }
 
 
@@ -105,19 +104,19 @@ public class MenuManager : Singleton<MenuManager>
     /// Toggles the background melody state based on the button interaction in the Melody_Option object.
     /// </summary>
     /// <param name="value">The state of the background melody (true = muted, false = unmuted)</param>
-    public void MelodyDisable(bool value)
+    public void MelodyMute(bool mute)
     {
+        _melodyDisable = mute;
         GameObject melody = GameObject.Find("Melody");
         if (melody != null)
         {
-            GameObject.Find("Melody").GetComponent<AudioSource>().mute = value;
-            _melodyDisable = value;
+            melody.GetComponent<AudioSource>().mute = mute;
         }
         else
         {
-            if(value)
+            if(mute == false)
             {
-                AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
+                AudioManager.PlayFromResources(Sound.Melody, 0.3f, 1, true);
             }
         }
     }

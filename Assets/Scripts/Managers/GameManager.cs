@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.q3cz605yh88g")]
 public class GameManager : Singleton<GameManager>
 {
     public BoardGenerate board;
@@ -11,9 +12,10 @@ public class GameManager : Singleton<GameManager>
     public string _player1Name = "Player1";
     public string _player2Name = "Player2";
 
+    private GameObject _gameOverObj;
 
     // Play the background melody on loop with specified volume and pitch
-    private void Awake() => AudioManager.PlayFromResources(Sounds.Melody, 0.3f, 1, true);
+    private void Awake() => AudioManager.PlayFromResources(Sound.Melody, 0.3f, 1, true);
 
 
     // Loads the game board and pieces
@@ -35,6 +37,9 @@ public class GameManager : Singleton<GameManager>
 
     public void DestroyBoard()
     {
+        if(piece == null || board == null) 
+            return;
+
         Destroy(GameObject.Find("Board"));
         piece.MillDetected -= Piece_millDetected;
         board = null; piece = null;
@@ -52,7 +57,7 @@ public class GameManager : Singleton<GameManager>
         Info.Instance.Message($"<color=yellow>{name}</color> formed a mill! <color=red>Remove a piece.</color>");
         Debug.Log($"{name} formed a mill! Remove a piece.");
 
-        AudioManager.PlayFromResources(Sounds.Mill, 0.5f);
+        AudioManager.PlayFromResources(Sound.Mill, 0.5f);
     }
 
     /// <summary>
@@ -61,25 +66,26 @@ public class GameManager : Singleton<GameManager>
     /// </summary>
     public void PlayerWin(string name)
     {
-        // Instantiate the "GameOver" popup and set its parent to the canvas
-        GameObject obj = Object.Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
+        if (_gameOverObj != null)
+            return;
 
-        // Show the popup animation
-        obj.GetComponent<AnimationPopup>().ShowPopup();
+        _gameOverObj = Instantiate(Resources.Load<GameObject>("Menu/Popup/GameOver"), GameObject.Find("Canvas").transform);
+
+        _gameOverObj.GetComponent<AnimationPopup>().ShowPopup();
 
         // Setup the exit popup window
-        if (obj.TryGetComponent<GameOver>(out var gameOver))
+        if (_gameOverObj.TryGetComponent<GameOver>(out var gameOver))
         {
             gameOver.SetBackToMenuButtonEvent(() => MenuManager.Instance.LoadMainMenu());
             gameOver.SetRestartButtonEvent(() => MenuManager.Instance.RestartCurrentLevel());
             gameOver.SetWinnerText(name);
         }
 
-        // Destroying the game board
-        Object.Destroy(GameObject.Find("Board"));
+        // Destroying the game board and pieces
+        Destroy(GameObject.Find("Board"));
 
         Debug.Log($"{name} wins!");
-        AudioManager.PlayFromResources(Sounds.YouWin, 0.7f);
+        AudioManager.PlayFromResources(Sound.YouWin, 0.7f);
         AudioManager.StopAudioClip("Melody");
     }
 

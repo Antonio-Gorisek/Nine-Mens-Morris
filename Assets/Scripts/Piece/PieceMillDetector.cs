@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.eqe52nm3brc0")]
 public class PieceMillDetector
 {
     // Dictionary that maps a position on the board to the name of the player who owns a piece there
@@ -14,10 +15,10 @@ public class PieceMillDetector
     private readonly List<List<Vector3>> _diagonalMills;
 
 
-    public PieceMillDetector(List<Vector3> linePoints, int ringsCount)
+    public PieceMillDetector(Board board)
     {
-        this._ownerMap = new Dictionary<Vector3, string>();
-        this._ringsCount = ringsCount;
+        this._ownerMap = board.OwnerMap;
+        this._ringsCount = board.RingsCount;
         this._horizontalMills = GenerateHorizontalMills(); // Generates all possible horizontal mills
         this._verticalMills = GenerateVerticalMills(); // Generates all possible vertical mills
         this._diagonalMills = GenerateDiagonalMills(); // Generates all possible diagonal mills
