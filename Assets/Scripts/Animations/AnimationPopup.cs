@@ -1,9 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.tlgl95g593of")]
 public class AnimationPopup : MonoBehaviour
 {
-    [SerializeField] private Sounds _sounds;
+    [SerializeField] private Sound _sounds;
     [SerializeField] private AnimationCurve _popupCurve;
     [SerializeField] private AnimationCurve _hideCurve;
     [Space(10)]

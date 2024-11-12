@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.8kq5cqf7g8f8")]
 public class BoardDrawer
 {
     private readonly LineRenderer _lineRendererPrefab;

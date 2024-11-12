@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.6m3ygcnuq9xw")]
 public class BoardGenerate
 {
     private readonly LineRenderer _lineRendererPrefab;

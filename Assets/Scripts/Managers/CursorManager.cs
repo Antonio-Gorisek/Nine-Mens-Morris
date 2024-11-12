@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.pfodmpmiyws9")]
 public class CursorManager : Singleton<CursorManager>
 {
     [SerializeField] private Vector2 _arrowOffset;

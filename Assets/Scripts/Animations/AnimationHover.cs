@@ -2,9 +2,10 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.1j0uag610t5")]
 public class AnimationHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [SerializeField] private Sounds _hoverSound = Sounds.None;
+    [SerializeField] private Sound _hoverSound = Sound.None;
     [SerializeField] private float _zoomFactor = 1.2f;
     [SerializeField] private float _zoomDuration = 0.2f;
     [SerializeField] private float _rotationAngle = 2f;

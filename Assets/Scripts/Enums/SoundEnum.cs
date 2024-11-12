@@ -1,7 +1,9 @@
 /// <summary>
 /// Enumeration of different sounds types.
+/// https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.dmvqf3zf6cz0
 /// </summary>
-public enum Sounds
+
+public enum Sound
 {
     None,
     pop,

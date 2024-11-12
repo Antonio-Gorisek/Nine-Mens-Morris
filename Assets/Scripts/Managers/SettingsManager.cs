@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.ml1nz46racuq")]
 public class SettingsManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text _sliderInfo;

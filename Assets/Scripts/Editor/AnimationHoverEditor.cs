@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.58jq7mvme1tl")]
 [CustomEditor(typeof(AnimationHover))]
 public class AnimationHoverEditor : Editor
 {

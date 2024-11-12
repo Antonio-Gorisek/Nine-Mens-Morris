@@ -2,6 +2,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.e8y9didvvary")]
 public class MouseHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public UnityEvent OnMouseEnterEvent;

@@ -2,6 +2,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.ulwmfqoied5i")]
 public class RingsSelection : MonoBehaviour
 {
     [SerializeField] private TMP_Text _sliderInfo;
@@ -17,7 +18,7 @@ public class RingsSelection : MonoBehaviour
         _slider.onValueChanged.AddListener((value) => {
             UpdateInfo(); // Update the displayed information when the slider value changes
             SaveRingsData(); // Save the updated number of rings to PlayerPrefs
-            AudioManager.PlayFromResources(Sounds.pop, 0.2f, 1.4f);
+            AudioManager.PlayFromResources(Sound.pop, 0.2f, 1.4f);
         });
     }
 

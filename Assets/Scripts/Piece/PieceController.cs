@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.bt8jthx7gj6t")]
 public class PieceController
 {
     public delegate void MillDetection(string name);
@@ -9,14 +11,13 @@ public class PieceController
     private PieceAnimation playerPieceAnimation;
     private GameObject _selectedPiece;
     private int _currentPlayerIndex;
+    private Board _board;
 
     private readonly Player[] _players;
     private readonly PieceMillDetector _pieceMillDetector;
     private readonly PieceMovement _pieceMovement;
 
     private readonly List<Vector3> _positionOfSpots = new List<Vector3>();
-
-    private readonly int _numberOfRings;
 
     /// <summary>
     /// Constructor for PieceController class.
@@ -42,11 +43,11 @@ public class PieceController
         };
 
         // Initialize movement and detection components
-        _pieceMillDetector = new PieceMillDetector(positionOfSpots, numberOfRings);
-        _pieceMovement = new PieceMovement(_pieceMillDetector, positionOfSpots, numberOfRings, _players);
+        _board = new Board(positionOfSpots, numberOfRings);
+        _pieceMillDetector = new PieceMillDetector(_board);
+        _pieceMovement = new PieceMovement(_pieceMillDetector, _board, _players);
 
         _positionOfSpots = positionOfSpots;
-        _numberOfRings = numberOfRings;
         // Announce the starting player's turn
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
@@ -114,12 +115,12 @@ public class PieceController
 
     private string GetAllNeighbors(Vector3 pos)
     {
-        PieceNeighbors pieceNeighbors = new PieceNeighbors(_pieceMillDetector.GetOwners(), _positionOfSpots, _numberOfRings);
+        PieceNeighbors pieceNeighbors = new PieceNeighbors(_pieceMillDetector.GetOwners(), _board);
         List<Vector3> positions = pieceNeighbors.GetAvailableMoves(pos);
         foreach (var position in positions)
         {
-            GameObject spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform.gameObject;
-            spot.transform.GetChild(1).transform.gameObject.SetActive(true);
+            Transform spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform;
+            spot.GetChild(1).gameObject.SetActive(true);
         }
         return null;
     }
@@ -131,8 +132,8 @@ public class PieceController
     {
         foreach (var position in _positionOfSpots)
         {
-            GameObject spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform.gameObject;
-            spot.transform.GetChild(1).transform.gameObject.SetActive(false);
+            Transform spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform;
+            spot.GetChild(1).gameObject.SetActive(false);
         }
 
         if (_selectedPiece != null)
@@ -226,10 +227,18 @@ public class PieceController
         // Proceed with removing the piece
         RemovePiece(piece, opponentPlayer);
 
+        string blockedPlayerName = IsAnyPlayerBlocked(_pieceMillDetector);
+        if (blockedPlayerName != null)
+        {
+            GameManager.Instance.PlayerWin(blockedPlayerName);
+            return;
+        }
+
         // Check if the opponent has fewer than 3 pieces remaining
         if (opponentPlayer.piecesOnBoard + opponentPlayer.remainingPieces < 3)
         {
             GameManager.Instance.PlayerWin(currentPlayer.playerName);
+            return;
         }
     }
 
@@ -263,7 +272,7 @@ public class PieceController
         {
             Debug.Log("Cannot remove that piece, it's part of a mill.");
             Info.Instance.Message("<color=red>Cannot remove that piece, it's part of a mill.</color>");
-            AudioManager.PlayFromResources(Sounds.Error, 0.5f);
+            AudioManager.PlayFromResources(Sound.Error, 0.5f);
             return true;
         }
         return false;
@@ -279,19 +288,12 @@ public class PieceController
 
         Debug.Log($"{opponentPlayer.playerName}'s piece at {piece.transform.position} was removed.");
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
-        AudioManager.PlayFromResources(Sounds.PieceRemove, 0.5f);
-
-        string blockedPlayerName = IsAnyPlayerBlocked(_pieceMillDetector);
-        if (blockedPlayerName != null)
-        {
-            GameManager.Instance.PlayerWin(blockedPlayerName);
-            return;
-        }
+        AudioManager.PlayFromResources(Sound.PieceRemove, 0.5f);
     }
 
     private string IsAnyPlayerBlocked(PieceMillDetector lineDetector)
     {
-        PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), _positionOfSpots, _numberOfRings);
+        PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), _board);
         foreach (var player in _players)
         {
             if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))

@@ -5,6 +5,7 @@ using TMPro;
 /// Manages player name input and persistence using Unity's PlayerPrefs.
 /// Allows the user to input or update player names, which are saved locally.
 /// </summary>
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.bfbvyq88fm3r")]
 public class PlayerNameSelection : MonoBehaviour
 {
     [SerializeField] private TMP_InputField _player1Name;

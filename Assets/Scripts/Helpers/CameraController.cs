@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.xu1kh2dq8r7w")]
 public static class CameraController
 {
     /// <summary>
