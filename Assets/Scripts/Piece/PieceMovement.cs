@@ -158,10 +158,10 @@ public class PieceMovement
 
         onSwitchPlayer.Invoke();
 
-        string blockedPlayerName = IsAnyPlayerBlocked(lineDetector);
-        if (blockedPlayerName != null)
+        string playerThatBlockOpponenet = IsAnyPlayerBlocked(lineDetector, selectedPiece.name);
+        if (playerThatBlockOpponenet != null)
         {
-            GameManager.Instance.PlayerWin(blockedPlayerName);
+            GameManager.Instance.PlayerWin(playerThatBlockOpponenet);
             yield break;
         }
 
@@ -183,15 +183,19 @@ public class PieceMovement
         _pieceMoving = false; // Reset after animation ends
     }
 
-    private string IsAnyPlayerBlocked(PieceMillDetector lineDetector)
+    private string IsAnyPlayerBlocked(PieceMillDetector lineDetector, string nameOfLastPieceMoved)
     {
         Board board = new Board(_positionOfSpots, _numberOfRings);
         PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), board);
+
         foreach (var player in _players)
         {
-            if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))
+            if (player.playerName != nameOfLastPieceMoved)
             {
-                return player.playerName;
+                if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))
+                {
+                    return nameOfLastPieceMoved;
+                }
             }
         }
         return null;

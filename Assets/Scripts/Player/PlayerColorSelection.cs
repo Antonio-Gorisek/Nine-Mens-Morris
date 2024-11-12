@@ -17,10 +17,10 @@ public class PlayerColorSelection : MonoBehaviour
 
     void Start()
     {
-        SaveDefaultColors(); // Save default color selections if not already saved
-        GetAllChildColors(); // Collect all color toggles for both players
-        AddToggleEvents(); // Add listeners to each color toggle
-        LoadSavedColors(); // Load saved color preferences from PlayerPrefs
+        GetAllChildColors();
+        SaveDefaultColors();
+        AddToggleEvents();
+        LoadSavedColors();
     }
 
     // Collects all the color toggle GameObjects for Player 1 and Player 2
@@ -135,6 +135,6 @@ public class PlayerColorSelection : MonoBehaviour
         if (!isActive || disableAudioEffect) return;
 
         // Play a sound effect with random pitch variation
-        AudioManager.PlayFromResources(Sound.pop, 0.3f, Random.Range(0.8f, 1.2f));
+        AudioManager.PlayFromResources(Sound.pop, 0.2f, Random.Range(0.8f, 1.2f));
     }
 }

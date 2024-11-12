@@ -12,7 +12,7 @@ public class GameManager : Singleton<GameManager>
     public string _player1Name = "Player1";
     public string _player2Name = "Player2";
 
-    private GameObject _gameOverObj;
+    [HideInInspector] public GameObject _gameOverObj;
 
     // Play the background melody on loop with specified volume and pitch
     private void Awake() => AudioManager.PlayFromResources(Sound.Melody, 0.3f, 1, true);
@@ -58,7 +58,7 @@ public class GameManager : Singleton<GameManager>
         Debug.Log($"{name} formed a mill! Remove a piece.");
 
         AudioManager.PlayFromResources(Sound.Mill, 0.5f);
-    }
+    } 
 
     /// <summary>
     /// Handles the logic when a player wins the game.

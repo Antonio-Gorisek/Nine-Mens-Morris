@@ -49,7 +49,7 @@ public class PlayerController : Singleton<PlayerController>
     /// </summary>
     private void TogglePauseMenu()
     {
-        if (MenuManager.Instance._transitionObj)
+        if (MenuManager.Instance._transitionObj || GameManager.Instance._gameOverObj != null)
             return;
 
         if (_pauseMenu != null)
@@ -62,6 +62,8 @@ public class PlayerController : Singleton<PlayerController>
 
         _pauseMenuAnimationPopup = _pauseMenu.GetComponentInChildren<AnimationPopup>();
         _pauseMenuGameOver = _pauseMenu.GetComponentInChildren<GameOver>();
+
+        _pauseMenu.GetComponent<Canvas>().worldCamera = _camera;
 
         _pauseMenuGameOver.SetBackToMenuButtonEvent(() => MenuManager.Instance.LoadMainMenu());
         _pauseMenuGameOver.SetRestartButtonEvent(() => MenuManager.Instance.RestartCurrentLevel());

@@ -116,7 +116,7 @@ public class PieceController
     private string GetAllNeighbors(Vector3 pos)
     {
         PieceNeighbors pieceNeighbors = new PieceNeighbors(_pieceMillDetector.GetOwners(), _board);
-        List<Vector3> positions = pieceNeighbors.GetAvailableMoves(pos);
+        List<Vector3> positions = pieceNeighbors.GetAvailableMoves(pos, _players[_currentPlayerIndex].playerName);
         foreach (var position in positions)
         {
             Transform spot = Physics2D.Raycast(position, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Spot")).transform;
@@ -227,10 +227,10 @@ public class PieceController
         // Proceed with removing the piece
         RemovePiece(piece, opponentPlayer);
 
-        string blockedPlayerName = IsAnyPlayerBlocked(_pieceMillDetector);
-        if (blockedPlayerName != null)
+        string playerThatBlockOpponenet = IsAnyPlayerBlocked(_pieceMillDetector, currentPlayer.playerName);
+        if (playerThatBlockOpponenet != null)
         {
-            GameManager.Instance.PlayerWin(blockedPlayerName);
+            GameManager.Instance.PlayerWin(playerThatBlockOpponenet);
             return;
         }
 
@@ -291,18 +291,23 @@ public class PieceController
         AudioManager.PlayFromResources(Sound.PieceRemove, 0.5f);
     }
 
-    private string IsAnyPlayerBlocked(PieceMillDetector lineDetector)
+    private string IsAnyPlayerBlocked(PieceMillDetector lineDetector, string nameOfLastPieceMoved)
     {
         PieceNeighbors pieceNeighbors = new PieceNeighbors(lineDetector.GetOwners(), _board);
+
         foreach (var player in _players)
         {
-            if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))
+            if (player.playerName != nameOfLastPieceMoved)
             {
-                return player.playerName;
+                if (pieceNeighbors.AreAllPiecesBlocked(player.playerName))
+                {
+                    return nameOfLastPieceMoved;
+                }
             }
         }
         return null;
     }
+
 
 
     /// <summary>
