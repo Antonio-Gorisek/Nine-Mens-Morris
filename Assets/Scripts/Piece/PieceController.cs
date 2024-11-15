@@ -268,7 +268,8 @@ public class PieceController
     // Method to check if the piece is part of a mill
     private bool IsPieceInMill(GameObject piece, Player opponentPlayer)
     {
-        if (_pieceMillDetector.IsMill(piece.transform.position, opponentPlayer.playerName))
+        if (_pieceMillDetector.IsMill(piece.transform.position, opponentPlayer.playerName) &&
+            !_pieceMillDetector.AreAllPiecesInMill(opponentPlayer.playerName))
         {
             Debug.Log("Cannot remove that piece, it's part of a mill.");
             Info.Instance.Message("<color=red>Cannot remove that piece, it's part of a mill.</color>");
