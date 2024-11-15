@@ -48,6 +48,7 @@ public class PieceController
         _pieceMovement = new PieceMovement(_pieceMillDetector, _board, _players);
 
         _positionOfSpots = positionOfSpots;
+        PlayerController.Instance.SetPlayerUIStats(_players);
         // Announce the starting player's turn
         Info.Instance.Message($"It's <color=yellow>{_players[_currentPlayerIndex].playerName}'s</color> turn.");
     }
@@ -199,6 +200,8 @@ public class PieceController
 
         // Switch to the next player
         SwitchPlayer();
+
+        PlayerController.Instance.SetPlayerUIStats(_players);
 
         // Check if placing the piece creates a mill
         if (_pieceMillDetector.IsMill(position, piece.name))

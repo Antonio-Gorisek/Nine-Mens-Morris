@@ -6,12 +6,17 @@ using UnityEditor;
 public class PlayerControllerEditor : Editor
 {
     private SerializedProperty _camera;
+    private SerializedProperty _playersPieces;
+    private SerializedProperty _playersPiecesCount;
+
     private Texture2D logoTexture;
 
     private void OnEnable()
     {
         // Fetch the properties
         _camera = serializedObject.FindProperty("_camera");
+        _playersPieces = serializedObject.FindProperty("_playersPieces");
+        _playersPiecesCount = serializedObject.FindProperty("_playersPiecesCount");
 
         // Load the logo texture from the Resources folder
         logoTexture = Resources.Load<Texture2D>("Editor/Images/PlayerController"); // Adjust the path as necessary
@@ -47,6 +52,10 @@ public class PlayerControllerEditor : Editor
         GUILayout.Label("Main Camera", headerStyle);
         GUILayout.Space(20);
         EditorGUILayout.PropertyField(_camera, new GUIContent("Main Camera"));
+        GUILayout.Label("Players Stats", headerStyle);
+        GUILayout.Space(20);
+        EditorGUILayout.PropertyField(_playersPieces, new GUIContent("Players UI Pieces"));
+        EditorGUILayout.PropertyField(_playersPiecesCount, new GUIContent("Players number of pieces"));
         GUILayout.EndVertical();
 
         serializedObject.ApplyModifiedProperties();
