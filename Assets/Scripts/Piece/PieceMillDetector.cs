@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [HelpURL("https://docs.google.com/document/d/1oEp6sHNLkIlHb_yE7KQcJDd3CRWB1CKEoaNf20HlOek/edit?tab=t.0#heading=h.eqe52nm3brc0")]
@@ -34,6 +35,20 @@ public class PieceMillDetector
             || CheckMill(position, currentPlayerName, _diagonalMills)
             || CheckHorizontalMill(position, currentPlayerName)
             || CheckVerticalMill(position, currentPlayerName);
+    }
+
+    public bool AreAllPiecesInMill(string playerName)
+    {
+        var playerPositons = _ownerMap.Where(piece => piece.Value == playerName).Select(piece =>  piece.Key).ToList();
+
+        foreach (var position in playerPositons)
+        {
+            if(!IsMill(position, playerName))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// <summary>
