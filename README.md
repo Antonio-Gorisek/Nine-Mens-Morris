@@ -31,7 +31,10 @@ Whether you're a developer looking to learn, build on top of this project, or si
 <a href="https://antonio-gorisek.itch.io/nine-mens-morris" target="_blank">
   <img src="https://static.itch.io/images/badge-color.svg" alt="App Screenshot" width="170" />
 </a>
-
+&nbsp;&nbsp;&nbsp;
+<a href="https://play.google.com/store/apps/details?id=com.Indigo.NineMensMorris" target="_blank">
+  <img src="https://i.imgur.com/TOZhhxX.png" alt="App Screenshot" width="170" />
+</a>
 
 ## Screenshots
 
